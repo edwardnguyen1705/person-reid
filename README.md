@@ -31,6 +31,14 @@
   - Hard Mining Triplet Loss
   - Weighted Triplet Loss
 - WarmupMultiStepLR, WarmupCosineAnnealingLR
+- Transform
+  - AutoAugment
+  - Cutout
+  - LGT (Local Grayscale Transfomation: An Effective Data Augmentation for person re-identification
+    )
+  - Random2DTranslation
+  - RandomErasing
+- Data Prefetcher, Prefetch Generator
 
 ## Installation
 
