@@ -41,7 +41,7 @@ model:
         name: ReLU
         inplace: true
 
-      pretrained: False
+      pretrained: True
 
   pooling:
     name: GeneralizedMeanPoolingP

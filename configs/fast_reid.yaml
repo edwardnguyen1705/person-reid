@@ -27,11 +27,11 @@ model:
     name: resnet
 
     resnet:
-      resnext: True
+      resnext: False
       with_se: False
       num_layer: 50
       with_d: False
-      resnext_type: 32x4d
+      resnext_type: null
       with_ibn_a: False
       last_stride: 1
       activation:
