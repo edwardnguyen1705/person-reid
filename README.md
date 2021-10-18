@@ -100,3 +100,5 @@ Other pretrained result: [wandb](https://wandb.ai/hiennguyen9874/rep-reid-v2)
 ## TDO
 
 - More datasets: DukeMTMC-reID, MSMT17, CUHK03, Market1501-500k
+- Heatmap visualize
+- Light Reid
