@@ -1,0 +1,112 @@
+base: configs/default.yaml
+
+data:
+  name: market1501
+  image_size: [384, 128]
+  num_workers: 4
+  train:
+    batch_size: 64
+    num_instances: 8
+    transform:
+      autoaugmentation: False
+      random_erasing: True
+      cutout: True
+      random2translate: True
+      lgt: True
+      random_grayscale: False
+
+  test:
+    batch_size: 256
+
+model:
+  name: LightMBN
+  num_classes: 751
+  feature_dim: 512
+
+  backbone:
+    name: osnet
+
+    osnet:
+      width: x1.0
+      ibn: False
+
+      attention:
+        enable: True
+        name: GlobalContext
+        rd_ratio: 0.0625 # it mean hidden_channel = 1 in nonlocal block
+        cam_batchnorm: True
+        pam_batchnorm: True
+
+      activation:
+        name: ReLU
+        inplace: true
+
+      pretrained: False
+
+  pooling:
+    name: GeneralizedMeanPoolingP
+
+  neck:
+    name: BNNeck
+    out_channels: null # not work with BNNeck
+    type_norm: 2d
+    bias_freeze: True
+    activation: # not work with BNNeck
+      name: SiLU
+      inplace: true
+
+  head:
+    name: Linear
+    scale: null
+    margin: null
+    k: null
+
+  feature_pos: before
+
+loss:
+  name: 0.5 * CrossEntropy + 0.5 * MultiSimilarityLoss
+
+  cross_entropy:
+    epsilon: 0.1
+    reduction: sum
+
+  multi_similarity:
+    alpha: 2.0
+    beta: 40.0
+    gamma: 0.7
+    eps: 1.0e-8
+
+optimizer:
+  name: adam
+  lr: 6.0e-4
+  adam:
+    beta1: 0.9
+    beta2: 0.999
+    weight_decay: 5.0e-4
+    amsgrad: False
+
+freeze:
+  enable: True
+  layers: [backbone, global_branch, partial_branch, channel_branch]
+  epochs: 5
+
+lr_scheduler:
+  enable: True
+  name: WarmupCosineAnnealingLR
+
+  WarmupCosineAnnealingLR:
+    max_iters: 150
+    delay_iters: 30
+    eta_min_lr: 6.0e-7
+    warmup_factor: 0.01
+    warmup_iters: 10
+    warmup_method: linear
+
+trainer:
+  epochs: 150
+  amp: True
+
+testing:
+  distance_mode: cosine
+  flip_inference: True
+  test_on_ema: False
