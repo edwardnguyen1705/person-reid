@@ -87,8 +87,8 @@ python src/engine/train.py --cfg [PATH_CONFIG] --gpu [DEVICE_ID] --checkpoint_di
 
 - [LightMBN](https://github.com/jixunbo/LightMBN) + [GlobalContext](https://arxiv.org/pdf/2012.13375v1.pdf) + GeneralizedMeanPooling:
 
-  - mAP: 91.61%
-  - mINP: 74.15%
+  - mAP: 91.7%
+  - mINP: 74.11%
 
 - Baseline + CircleSoftmax + BNNeck + GeneralizedMeanPoolingP + NonLocalBlock(ratio=0.0625) + AutoAugmentation(p=0.1)
 
@@ -97,8 +97,9 @@ python src/engine/train.py --cfg [PATH_CONFIG] --gpu [DEVICE_ID] --checkpoint_di
 
 Other pretrained result: [wandb](https://wandb.ai/hiennguyen9874/rep-reid-v2)
 
-## TDO
+## TODO
 
 - More datasets: DukeMTMC-reID, MSMT17, CUHK03, Market1501-500k
 - Heatmap visualize
 - Light Reid
+- ReRanking
