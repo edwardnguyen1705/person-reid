@@ -15,11 +15,12 @@ class Writer(HookBase):
 
     def after_step(self):
         self.progress_bar.set_postfix(
-            dict(
-                (key, "%.3f" % value)
+            {
+                key: "%.3f" % value
                 for key, value in self.trainer.result_train_step.items()
-            )
+            }
         )
+
         self.progress_bar.update(1)
 
     def break_step(self):

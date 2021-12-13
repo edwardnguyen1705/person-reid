@@ -41,14 +41,13 @@ if __name__ == "__main__":
 
     args.distributed = args.world_size > 1 or args.multiprocessing_distributed
 
-    if args.resume_path != "":
-        if args.resume_run_id != "":
-            args.run_id = args.resume_run_id
-        else:
-            args.run_id = get_run_id(args.resume_path)
-    else:
+    if args.resume_path == "":
         args.run_id = gen_run_id(cfg["timezone"])
 
+    elif args.resume_run_id != "":
+        args.run_id = args.resume_run_id
+    else:
+        args.run_id = get_run_id(args.resume_path)
     args.checkpoint_dir = get_checkpoint_dir(args.run_id, args.checkpoint_dir)
 
     ngpus_per_node = torch.cuda.device_count()

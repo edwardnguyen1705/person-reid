@@ -61,11 +61,7 @@ class BasicBlock(nn.Module):
             inplanes, planes, kernel_size=3, stride=stride, padding=1, bias=False
         )
 
-        if ibn == "a":
-            self.bn1 = IBN(planes)
-        else:
-            self.bn1 = nn.BatchNorm2d(planes)
-
+        self.bn1 = IBN(planes) if ibn == "a" else nn.BatchNorm2d(planes)
         self.relu = copy.deepcopy(activation)
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(planes)
@@ -112,10 +108,7 @@ class Bottleneck(nn.Module):
         width = int(planes * (base_width / 64.0)) * groups
 
         self.conv1 = nn.Conv2d(inplanes, width, kernel_size=1, bias=False)
-        if ibn == "a":
-            self.bn1 = IBN(width)
-        else:
-            self.bn1 = nn.BatchNorm2d(width)
+        self.bn1 = IBN(width) if ibn == "a" else nn.BatchNorm2d(width)
         self.conv2 = nn.Conv2d(
             width,
             width,
@@ -272,7 +265,7 @@ class ResNet(nn.Module):
     ):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
-            if avg_down == False:
+            if not avg_down:
                 downsample = nn.Sequential(
                     nn.Conv2d(
                         self.inplanes,
@@ -304,8 +297,7 @@ class ResNet(nn.Module):
                     nn.BatchNorm2d(planes * block.expansion),
                 )
 
-        layers = []
-        layers.append(
+        layers = [
             block(
                 inplanes=self.inplanes,
                 planes=planes,
@@ -317,7 +309,8 @@ class ResNet(nn.Module):
                 activation=activation,
                 with_se=self.with_se,
             )
-        )
+        ]
+
         self.inplanes = planes * block.expansion
         for i in range(1, blocks):
             layers.append(
@@ -459,7 +452,7 @@ class ResNet(nn.Module):
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
                 m.weight.data.normal_(0, math.sqrt(2.0 / n))
-            elif isinstance(m, nn.BatchNorm2d) or isinstance(m, nn.InstanceNorm2d):
+            elif isinstance(m, (nn.BatchNorm2d, nn.InstanceNorm2d)):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
 
@@ -481,11 +474,7 @@ def get_resnet_name(
     if with_se:
         resnet_name += "se"
 
-    if resnext:
-        resnet_name += "resnext"
-    else:
-        resnet_name += "resnet"
-
+    resnet_name += "resnext" if resnext else "resnet"
     resnet_name += str(num_layer)
 
     if with_d:
@@ -504,7 +493,7 @@ def get_resnet_name(
 
 
 def convert_se_layer_from_timm(state_dict):
-    new_state_dict = dict()
+    new_state_dict = {}
     for key, value in state_dict.items():
         key = key.replace("se.fc1", "se.conv_reduce").replace(
             "se.fc2", "se.conv_expand"
@@ -579,7 +568,7 @@ def build_resnet(cfg: dict) -> ResNet:
         with_se=with_se,
         stem_width=32 if with_d else 64,
         stem_type="deep" if with_d else "",
-        avg_down=True if with_d else False,
+        avg_down=bool(with_d),
         attention_cfg=attention_cfg,
     )
 

@@ -451,15 +451,7 @@ class OSNet(nn.Module):
         IN=False,
         activation: Callable = nn.ReLU(inplace=True),
     ):
-        layers = []
-        layers.append(
-            blocks[0](
-                in_channels,
-                out_channels,
-                IN=IN,
-                activation=activation,
-            )
-        )
+        layers = [blocks[0](in_channels, out_channels, IN=IN, activation=activation)]
         for i in range(1, layer):
             layers.append(
                 blocks[i](
@@ -487,15 +479,11 @@ class OSNet(nn.Module):
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
 
-            elif isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-
-            elif isinstance(m, nn.BatchNorm1d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-
-            elif isinstance(m, nn.InstanceNorm2d):
+            elif (
+                isinstance(m, nn.BatchNorm2d)
+                or isinstance(m, nn.BatchNorm1d)
+                or isinstance(m, nn.InstanceNorm2d)
+            ):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
@@ -533,13 +521,12 @@ def init_pretrained_weights(model, key=""):
         ENV_TORCH_HOME = "TORCH_HOME"
         ENV_XDG_CACHE_HOME = "XDG_CACHE_HOME"
         DEFAULT_CACHE_DIR = "~/.cache"
-        torch_home = os.path.expanduser(
+        return os.path.expanduser(
             os.getenv(
                 ENV_TORCH_HOME,
                 os.path.join(os.getenv(ENV_XDG_CACHE_HOME, DEFAULT_CACHE_DIR), "torch"),
             )
         )
-        return torch_home
 
     torch_home = _get_torch_home()
     model_dir = os.path.join(torch_home, "checkpoints")

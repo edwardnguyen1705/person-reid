@@ -95,14 +95,7 @@ class Efficientnet(nn.Module):
 
         self.blocks = []
         pre_channels = channels
-        for idx_block, (
-            module,
-            expand_ratio,
-            channels,
-            repeats,
-            stride,
-            kernel_size,
-        ) in enumerate(base_model):
+        for module, expand_ratio, channels, repeats, stride, kernel_size in base_model:
             out_channels = make_divisible(channels * width_factor, divisor=8)
 
             num_layer = math.ceil(repeats * depth_factor)

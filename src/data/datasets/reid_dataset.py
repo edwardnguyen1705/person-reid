@@ -38,9 +38,9 @@ class ReidDataset(torch.utils.data.Dataset):
         return len(self.data)
 
     def __getimage__(self, index):
-        if self.cache != None:
-            path, person_id, camera_id, *_ = self.data[index]
+        path, person_id, camera_id, *_ = self.data[index]
 
+        if self.cache != None:
             if self.cache.is_cached(path):
                 return self.cache.get(path), person_id, camera_id
 
@@ -48,14 +48,12 @@ class ReidDataset(torch.utils.data.Dataset):
                 path, "cv2" if self.transform_lib == "albumentations" else "pillow"
             )
             self.cache.cache(path, image)
-            return image, person_id, camera_id
-
         else:
-            path, person_id, camera_id, *_ = self.data[index]
             image = imread(
                 path, "cv2" if self.transform_lib == "albumentations" else "pillow"
             )
-            return image, person_id, camera_id
+
+        return image, person_id, camera_id
 
     def __getitem__(self, index):
         image, person_id, camera_id = self.__getimage__(index)

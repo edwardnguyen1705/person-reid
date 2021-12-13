@@ -8,15 +8,16 @@ from .batch_dropblock import BatchDrop
 
 
 class BatchDropTop(nn.Module):
-    def __init__(self, h_ratio):
+    def __init__(self, h_ratio: float, visdrop: bool = False):
         super(BatchDropTop, self).__init__()
+        self.visdrop = visdrop
         self.h_ratio = h_ratio
 
-    def forward(self, x, visdrop=False):
-        if self.training or visdrop:
+    def forward(self, x):
+        if self.training or self.visdrop:
             b, c, h, w = x.size()
             rh = round(self.h_ratio * h)
-            act = (x ** 2).sum(1)
+            act = (x ** 2).sum(dim=1)
             act = act.view(b, h * w)
             act = F.normalize(act, p=2, dim=1)
             act = act.view(b, h, w)
@@ -34,7 +35,7 @@ class BatchDropTop(nn.Module):
             mask = torch.repeat_interleave(mask, w, 1).view(b, h, w)
             mask = torch.repeat_interleave(mask, c, 0).view(b, c, h, w)
 
-            if visdrop:
+            if self.visdrop:
                 return mask
 
             x = x * mask
@@ -67,14 +68,14 @@ class BatchFeatureErase_Top(nn.Module):
         self.drop_batch_bottleneck = bottleneck(channels, 512)
 
         if self.drop_top:
-            self.drop_batch_drop = BatchDropTop(h_ratio)
+            self.drop_batch_drop = BatchDropTop(h_ratio, self.visdrop)
         else:
             self.drop_batch_drop = BatchDrop(h_ratio, w_ratio)
 
     def forward(self, x):
         features = self.drop_batch_bottleneck(x)
 
-        x = self.drop_batch_drop(features, visdrop=self.visdrop)
+        x = self.drop_batch_drop(features)
 
         if self.visdrop:
             return x  # x is dropmask

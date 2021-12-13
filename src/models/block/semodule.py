@@ -25,7 +25,7 @@ class SEModule(nn.Module):
         super(SEModule, self).__init__()
         if not rd_channels:
             rd_channels = make_divisible(
-                channels * rd_ratio, rd_divisor, round_limit=round_limit
+                channels * rd_ratio, divisor=rd_divisor, round_limit=round_limit
             )
         self.conv_reduce = nn.Conv2d(
             in_channels=channels, out_channels=rd_channels, kernel_size=1, bias=True

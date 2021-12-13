@@ -198,7 +198,7 @@ class LightConvStream(nn.Module):
         )
         layers = []
         layers += [LightConv3x3(in_channels, out_channels, activation=activation)]
-        for i in range(depth - 1):
+        for _ in range(depth - 1):
             layers += [LightConv3x3(out_channels, out_channels, activation=activation)]
         self.layers = nn.Sequential(*layers)
 
@@ -296,7 +296,7 @@ class OSBlock(nn.Module):
         x2 = 0
         for conv2_t in self.conv2:
             x2_t = conv2_t(x1)
-            x2 = x2 + self.gate(x2_t)
+            x2 += self.gate(x2_t)
         x3 = self.conv3(x2)
         if self.downsample is not None:
             identity = self.downsample(identity)
@@ -330,7 +330,7 @@ class OSBlockINin(nn.Module):
         x2 = 0
         for conv2_t in self.conv2:
             x2_t = conv2_t(x1)
-            x2 = x2 + self.gate(x2_t)
+            x2 += self.gate(x2_t)
         x3 = self.conv3(x2)
         x3 = self.IN(x3)  # IN inside residual
         if self.downsample is not None:
@@ -439,14 +439,7 @@ class OSNet(nn.Module):
         out_channels,
         activation: Callable = nn.ReLU(inplace=True),
     ):
-        layers = []
-        layers.append(
-            blocks[0](
-                in_channels,
-                out_channels,
-                activation=activation,
-            )
-        )
+        layers = [blocks[0](in_channels, out_channels, activation=activation)]
         for i in range(1, layer):
             layers.append(
                 blocks[i](
@@ -465,15 +458,11 @@ class OSNet(nn.Module):
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
 
-            elif isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-
-            elif isinstance(m, nn.BatchNorm1d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-
-            elif isinstance(m, nn.InstanceNorm2d):
+            elif (
+                isinstance(m, nn.BatchNorm2d)
+                or isinstance(m, nn.BatchNorm1d)
+                or isinstance(m, nn.InstanceNorm2d)
+            ):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
@@ -513,13 +502,12 @@ def init_pretrained_weights(model, key=""):
         ENV_TORCH_HOME = "TORCH_HOME"
         ENV_XDG_CACHE_HOME = "XDG_CACHE_HOME"
         DEFAULT_CACHE_DIR = "~/.cache"
-        torch_home = os.path.expanduser(
+        return os.path.expanduser(
             os.getenv(
                 ENV_TORCH_HOME,
                 os.path.join(os.getenv(ENV_XDG_CACHE_HOME, DEFAULT_CACHE_DIR), "torch"),
             )
         )
-        return torch_home
 
     torch_home = _get_torch_home()
     model_dir = os.path.join(torch_home, "checkpoints")

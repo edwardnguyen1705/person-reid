@@ -83,10 +83,10 @@ class TripletLoss(nn.Module):
         norm_feature: bool = False,
         eps: float = 1e-6,
     ):
-        assert distance_mode in [
+        assert distance_mode in {
             "euclidean",
             "cosine",
-        ], f"distance_mode not support, must in [euclidean, cosine]"
+        }, "distance_mode not support, must in [euclidean, cosine]"
 
         if norm_feature and distance_mode == "cosine":
             raise ValueError("norm_feature only support euclidian distance mode")

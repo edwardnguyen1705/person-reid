@@ -36,5 +36,4 @@ class Random2DTranslation(object):
         y_maxrange = new_height - self.height
         x1 = int(round(random.uniform(0, x_maxrange)))
         y1 = int(round(random.uniform(0, y_maxrange)))
-        cropped_img = resized_img.crop((x1, y1, x1 + self.width, y1 + self.height))
-        return cropped_img
+        return resized_img.crop((x1, y1, x1 + self.width, y1 + self.height))

@@ -6,7 +6,7 @@ data:
   num_workers: 4
   train:
     batch_size: 128
-    num_instances: 32
+    num_instances: 32 # num image per batch
     transform:
       autoaugmentation: False
       random_erasing: True

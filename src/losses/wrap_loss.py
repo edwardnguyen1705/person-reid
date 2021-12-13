@@ -61,18 +61,20 @@ class WrapLoss(nn.Module):
         for func, scale, type in zip(self.loss_func, self.loss_scale, self.loss_type):
             if type == LossType.IDENTITY_LOSS:
                 loss = (
-                    sum([func(x, targets) for x in score])
-                    if isinstance(score, list) or isinstance(score, tuple)
+                    sum(func(x, targets) for x in score)
+                    if isinstance(score, (list, tuple))
                     else func(score, targets)
                 )
+
                 id_loss += loss
 
             else:
                 loss = (
-                    sum([func(x, targets) for x in feat])
-                    if isinstance(feat, list) or isinstance(feat, tuple)
+                    sum(func(x, targets) for x in feat)
+                    if isinstance(feat, (list, tuple))
                     else func(feat, targets)
                 )
+
                 ranking_loss += loss
 
             losses += scale * loss

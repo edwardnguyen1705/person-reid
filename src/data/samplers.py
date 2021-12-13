@@ -25,7 +25,7 @@ class RandomIdentitySampler(torch.utils.data.Sampler):
         self.num_instances = num_instances
         self.num_pids_per_batch = self.batch_size // self.num_instances
 
-        if index_dict == None:
+        if index_dict is None:
             self.index_dict = defaultdict(list)
             for index, (_, person_id, _) in enumerate(self.datasource):
                 self.index_dict[person_id].append(index)
@@ -37,8 +37,7 @@ class RandomIdentitySampler(torch.utils.data.Sampler):
         self.length = 0
         for person_id in self.person_ids:
             num = len(self.index_dict[person_id])
-            if num < self.num_instances:
-                num = self.num_instances
+            num = max(num, self.num_instances)
             self.length += num - num % self.num_instances
 
     def __len__(self):

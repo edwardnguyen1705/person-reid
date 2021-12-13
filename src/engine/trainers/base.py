@@ -148,13 +148,13 @@ class BaseTrainer(object):
             h.end()
 
     def _is_root(self):
-        if is_root(
-            self.args.multiprocessing_distributed,
-            self.args.rank,
-            self.args.ngpus_per_node,
-        ):
-            return True
-        return False
+        return bool(
+            is_root(
+                self.args.multiprocessing_distributed,
+                self.args.rank,
+                self.args.ngpus_per_node,
+            )
+        )
 
     def _setup_dist(self):
         if self.args.gpu is not None and self._is_root():

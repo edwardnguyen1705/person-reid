@@ -18,9 +18,9 @@ class Market1501(object):
         query_dir = os.path.join(root, "query")
         gallery_dir = os.path.join(root, "bounding_box_test")
 
-        self.pid_container = dict()
-        self.camid_containter = dict()
-        self.frames_container = dict()
+        self.pid_container = {}
+        self.camid_containter = {}
+        self.frames_container = {}
 
         (
             self.train,
@@ -90,9 +90,8 @@ class Market1501(object):
                     int, pattern.search(name).groups()
                 )
 
-                if ignore_junk:
-                    if person_id == -1:
-                        continue
+                if ignore_junk and person_id == -1:
+                    continue
 
                 if relabel:
                     person_id = pid2label[person_id]
@@ -157,9 +156,7 @@ class Market1501(object):
             68: 0,
         }
 
-        re_frame = 0
-        for i in range(1, seq):
-            re_frame += dict_cam_seq_max[int(str(cam) + str(i))]
+        re_frame = sum(dict_cam_seq_max[int(str(cam) + str(i))] for i in range(1, seq))
         return re_frame + frame
 
     def get_classes(self):

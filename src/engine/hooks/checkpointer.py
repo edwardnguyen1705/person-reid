@@ -21,7 +21,7 @@ class Checkpointer(HookBase):
         for x, _ in self.train_metrics.items():
             self.train_best_metrics[x] = None
 
-        self.val_best_metrics = dict()
+        self.val_best_metrics = {}
         for x, _ in self.val_metrics.items():
             self.val_best_metrics[x] = None
 
@@ -65,32 +65,27 @@ class Checkpointer(HookBase):
 
         if self.trainer._is_root():
             for metric, value in self.train_best_metrics.items():
-                state.update({"train_best_{}".format(metric): value})
-
+                state["train_best_{}".format(metric)] = value
             for metric, value in self.val_best_metrics.items():
-                state.update({"val_best_{}".format(metric): value})
-
+                state["val_best_{}".format(metric)] = value
         return state
 
     def _get_best_metric(self, metrics, results, best_metrics):
-        save_best = dict()
+        save_best = {}
         for metric, is_min_type in metrics.items():
+            save_best[metric] = False
             if is_min_type:
-                save_best[metric] = False
                 if (
-                    best_metrics[metric] == None
+                    best_metrics[metric] is None
                     or best_metrics[metric] >= results[metric]
                 ):
                     best_metrics[metric] = results[metric]
                     save_best[metric] = True
-            else:
-                save_best[metric] = False
-                if (
-                    best_metrics[metric] == None
-                    or best_metrics[metric] <= results[metric]
-                ):
-                    best_metrics[metric] = results[metric]
-                    save_best[metric] = True
+            elif (
+                best_metrics[metric] is None or best_metrics[metric] <= results[metric]
+            ):
+                best_metrics[metric] = results[metric]
+                save_best[metric] = True
         return save_best, best_metrics
 
     def _save(self, filename, state_dict):
@@ -114,20 +109,21 @@ class Checkpointer(HookBase):
         )
 
     def after_epoch(self):
-        if self.trainer._is_root():
-            state_dict = self._get_state_dict()
+        if not self.trainer._is_root():
+            return
+        state_dict = self._get_state_dict()
 
-            # Save last checkpoint
-            self._save("last.pth", state_dict)
+        # Save last checkpoint
+        self._save("last.pth", state_dict)
 
-            for metric, is_save in self.train_save_best.items():
+        for metric, is_save in self.train_save_best.items():
+            if is_save:
+                self._save(f"train_best_{metric}.pth", state_dict)
+
+        if self.trainer.check_is_val_epoch(self.trainer.epoch):
+            for metric, is_save in self.val_save_best.items():
                 if is_save:
-                    self._save(f"train_best_{metric}.pth", state_dict)
-
-            if self.trainer.check_is_val_epoch(self.trainer.epoch):
-                for metric, is_save in self.val_save_best.items():
-                    if is_save:
-                        self._save(f"val_best_{metric}.pth", state_dict)
+                    self._save(f"val_best_{metric}.pth", state_dict)
 
     def _save_by_copy(self, from_filepath, to_filepath):
         print(f"Saving {to_filepath}")

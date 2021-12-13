@@ -24,5 +24,4 @@ class IBN(nn.Module):
         split = torch.split(x, self.half_planes, 1)
         out1 = self.IN(split[0].contiguous())
         out2 = self.BN(split[1].contiguous())
-        out = torch.cat((out1, out2), dim=1)
-        return out
+        return torch.cat((out1, out2), dim=1)

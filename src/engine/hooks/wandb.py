@@ -90,10 +90,10 @@ class Wandb(HookBase):
 
     def after_test(self):
         wandb.log(
-            dict(
-                (f"hparams/{key}", value)
+            {
+                f"hparams/{key}": value
                 for key, value in self.trainer.checkpointer.test_best_metrics.items()
-            )
+            }
         )
 
     def end(self):

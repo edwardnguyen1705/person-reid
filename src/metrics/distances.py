@@ -20,9 +20,7 @@ def cosine_similarity(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
 
 
 def cosine_dist(x: torch.Tensor, y: torch.Tensor, alpha: int = 1) -> torch.Tensor:
-    # cosine_distance = 1 - cosine_similarity
-    dist = alpha - alpha * cosine_similarity(x, y)
-    return dist
+    return alpha - alpha * cosine_similarity(x, y)
 
 
 def euclidean_dist(
@@ -50,9 +48,7 @@ def self_cosine_similarity(x: torch.Tensor) -> torch.Tensor:
 
 
 def self_cosine_dist(x: torch.Tensor, alpha: int = 1) -> torch.Tensor:
-    # cosine_distance = 1 - cosine_similarity
-    dist = alpha - alpha * self_cosine_similarity(x)
-    return dist
+    return alpha - alpha * self_cosine_similarity(x)
 
 
 def self_euclidean_dist(

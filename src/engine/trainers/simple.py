@@ -312,7 +312,7 @@ class SimpleTrainer(BaseTrainer):
             self.optimizer.zero_grad(set_to_none=True)
 
         if self._is_root():
-            if isinstance(pred_cls, list) or isinstance(pred_cls, tuple):
+            if isinstance(pred_cls, (list, tuple)):
                 total_acc1, total_acc5, total_acc10 = 0, 0, 0
                 for x in pred_cls:
                     acc1, acc5, acc10 = accuracy(x, target, topk=(1, 5, 10))
@@ -331,7 +331,7 @@ class SimpleTrainer(BaseTrainer):
             else:
                 raise RuntimeError("pred_cls has type not support")
 
-            metric_dict = {
+            return {
                 "loss": loss.item(),
                 "id_loss": loss_item[0].item(),
                 "ranking_loss": loss_item[1].item(),
@@ -339,8 +339,6 @@ class SimpleTrainer(BaseTrainer):
                 "top5": acc5.item(),
                 "top10": acc10.item(),
             }
-
-            return metric_dict
         return None
 
     def check_is_val_epoch(self, epoch: int):
@@ -399,9 +397,7 @@ class SimpleTrainer(BaseTrainer):
         }
 
     def check_is_test(self):
-        if self.args.test_from_checkpoint:
-            return True
-        return False
+        return bool(self.args.test_from_checkpoint)
 
     def before_test_step(self):
         super().before_test_step()

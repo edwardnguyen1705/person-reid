@@ -27,7 +27,7 @@ def get_activations(name: str, *args, **kwargs) -> nn.Module:
 
 
 def cfg_without_name(cfg):
-    return dict((key, value) for key, value in cfg.items() if key != "name")
+    return {key: value for key, value in cfg.items() if key != "name"}
 
 
 def cfg_to_activation(cfg):

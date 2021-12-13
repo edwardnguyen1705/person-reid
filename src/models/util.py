@@ -27,6 +27,9 @@ def get_norm(in_features, type_norm="2d", bias_freeze=False):
         norm = nn.BatchNorm1d(in_features)
     elif type_norm == "2d":
         norm = nn.BatchNorm2d(in_features)
+    else:
+        raise ValueError("type_norm not support")
+
     if bias_freeze:
         norm.bias.requires_grad_(False)
     return norm
@@ -36,5 +39,5 @@ def remove_layers_from_state_dict(state_dict: OrderedDict, layers: List[str]):
     return OrderedDict(
         (key, value)
         for key, value in state_dict.items()
-        if not any([key.startswith(x) for x in layers])
+        if not any(key.startswith(x) for x in layers)
     )

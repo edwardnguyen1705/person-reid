@@ -5,7 +5,8 @@ import torch.nn as nn
 
 
 class BatchDrop(nn.Module):
-    def __init__(self, h_ratio, w_ratio):
+    # Random block and set it value to zero for batch
+    def __init__(self, h_ratio: float, w_ratio: float):
         super(BatchDrop, self).__init__()
         self.h_ratio = h_ratio
         self.w_ratio = w_ratio

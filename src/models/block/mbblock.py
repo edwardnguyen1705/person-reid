@@ -25,6 +25,8 @@ def get_att(att_name: str):
 
 
 class ConvBnAct(nn.Module):
+    r"""Conv + Norm Layer + Activation w/ optional skip connection"""
+
     def __init__(
         self,
         in_channels: int,
@@ -64,6 +66,8 @@ class ConvBnAct(nn.Module):
 
 
 class DSConv(nn.Module):
+    r"""Same as MBConv but exp_ratio is 1.0. Is is first block in Efficientnet and MobileNetV3"""
+
     def __init__(
         self,
         in_channels: int,
@@ -71,7 +75,7 @@ class DSConv(nn.Module):
         kernel_size: int,
         stride: int,
         padding: int,
-        exp_ratio: int = 4,
+        exp_ratio: float = 1.0,
         se_layer: bool = True,
         activation: Callable = nn.ReLU(inplace=True),
         rd_ratio: float = 1 / 16.0,
@@ -106,7 +110,7 @@ class DSConv(nn.Module):
                 gate_fn=gate_fn,
                 round_limit=round_limit,
             )
-            if se_layer == True
+            if se_layer
             else nn.Identity()
         )
 
@@ -148,7 +152,7 @@ class MBConv(nn.Module):
         kernel_size: int,
         stride: int,
         padding: int,
-        exp_ratio: int = 4,
+        exp_ratio: float = 4,
         se_layer: bool = True,
         activation: Callable = nn.ReLU(inplace=True),
         rd_ratio: float = 1 / 16.0,
@@ -195,7 +199,7 @@ class MBConv(nn.Module):
                 gate_fn=gate_fn,
                 round_limit=round_limit,
             )
-            if se_layer == True
+            if se_layer
             else nn.Identity()
         )
 
@@ -239,7 +243,7 @@ class FusedMBConv(nn.Module):
         kernel_size: int,
         stride: int,
         padding: int,
-        exp_ratio: int = 4,
+        exp_ratio: float = 4,
         se_layer: bool = False,
         activation: Callable = nn.ReLU(inplace=True),
         rd_ratio: float = 1 / 16.0,
@@ -277,7 +281,7 @@ class FusedMBConv(nn.Module):
                 gate_fn=gate_fn,
                 round_limit=round_limit,
             )
-            if se_layer == True
+            if se_layer
             else nn.Identity()
         )
 

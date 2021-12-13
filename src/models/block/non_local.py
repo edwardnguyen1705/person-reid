@@ -24,13 +24,7 @@ class NonLocalBlock(nn.Module):
 
         self.channels = channels
 
-        if rd_ratio == -1:
-            # wrong version in reid-survey
-            self.hidden_channel = 1
-        else:
-            # in origin non-local paper
-            self.hidden_channel = int(channels * rd_ratio)
-
+        self.hidden_channel = 1 if rd_ratio == -1 else int(channels * rd_ratio)
         self.theta = nn.Conv2d(
             self.channels, self.hidden_channel, kernel_size=1, stride=1, padding=0
         )
@@ -131,9 +125,6 @@ class NonLocalAttn(nn.Module):
                 nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
                 if len(list(m.parameters())) > 1:
                     nn.init.constant_(m.bias, 0.0)  # type: ignore
-            elif isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 0)
-                nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.GroupNorm):
+            elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
                 nn.init.constant_(m.weight, 0)
                 nn.init.constant_(m.bias, 0)

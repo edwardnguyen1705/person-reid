@@ -54,21 +54,17 @@ def get_model(model):
 
 
 def convert_state_dict(state_dict):
-    if all([x.startswith("module.") for x in state_dict.keys()]):
-        return dict((key[len("module.") :], value) for key, value in state_dict.items())
+    if all(x.startswith("module.") for x in state_dict.keys()):
+        return {key[len("module.") :]: value for key, value in state_dict.items()}
     return state_dict
 
 
 def is_root(multiprocessing_distributed: bool, rank: int, ngpus_per_node: int):
-    if not multiprocessing_distributed or (
-        multiprocessing_distributed and rank % ngpus_per_node == 0
-    ):
-        return True
-    return False
+    return not multiprocessing_distributed or rank % ngpus_per_node == 0
 
 
 def check_any(input):
-    if isinstance(input, list) or isinstance(input, tuple):
+    if isinstance(input, (list, tuple)):
         for x in input:
             check_any(x)
     elif isinstance(input, torch.Tensor):
@@ -105,14 +101,13 @@ def batch_to_device(batch, *args, **kwargs):
     if isinstance(batch, torch.Tensor) or hasattr(batch, "to"):
         return batch.to(*args, **kwargs)
 
-    if isinstance(batch, list) or isinstance(batch, tuple):
+    if isinstance(batch, (list, tuple)):
         return [batch_to_device(b, *args, **kwargs) for b in batch]
 
     if isinstance(batch, dict):
-        return dict(
-            (key, batch_to_device(value, *args, **kwargs))
-            for key, value in batch.items()
-        )
+        return {
+            key: batch_to_device(value, *args, **kwargs) for key, value in batch.items()
+        }
 
     raise RuntimeError("Type of batch not support, got type: %s" % type(batch))
 

@@ -17,10 +17,7 @@ def read_cfg(path_cfg: str):
         copied from here: https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
         """
         for k, v in u.items():
-            if isinstance(v, Mapping):
-                d[k] = update(d.get(k, {}), v)
-            else:
-                d[k] = v
+            d[k] = update(d.get(k, {}), v) if isinstance(v, Mapping) else v
         return d
 
     cfg = yaml.safe_load(open(path_cfg))

@@ -46,7 +46,6 @@ class DataPrefetcher:
 
             self.preload()
 
-            return batch
         else:
             batch = next(self.loader, None)
 
@@ -55,7 +54,7 @@ class DataPrefetcher:
 
             batch = batch_to_device(batch, device=self.device, non_blocking=True)
 
-            return batch
+        return batch
 
     def __next__(self):
         return self.next()
