@@ -221,9 +221,9 @@ class SimpleTrainer(BaseTrainer):
                     hooks.Writer(total_iterations=len(self.train_dataloader)),
                     hooks.Wandb(
                         config={**self.cfg, **vars(self.args)},
-                        project=self.config['wandb_project'],
+                        project=self.config["wandb"]["project"],
                         run_id=self.args.run_id,
-                        entity=self.config['wandb_entity'],
+                        entity=self.config["wandb"]["entity"],
                         group=None,
                         sync_tensorboard=True,
                     ),
