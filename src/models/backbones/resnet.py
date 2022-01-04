@@ -148,7 +148,9 @@ class Bottleneck(nn.Module):
                 + self.se(
                     self.bn3(
                         self.conv3(
-                            self.bn2(self.conv2(self.relu(self.bn1(self.conv1(x)))))
+                            self.relu(
+                                self.bn2(self.conv2(self.relu(self.bn1(self.conv1(x)))))
+                            )
                         )
                     )
                 )
@@ -208,8 +210,9 @@ class ResNet(nn.Module):
             self.bn1 = nn.BatchNorm2d(self.inplanes)
 
         self.relu = copy.deepcopy(activation)
-        # self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, ceil_mode=True)
+        # TODO: Check maxpool
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        # self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, ceil_mode=True)
         self.layer1 = self._make_layer(
             block,
             self.inplanes,

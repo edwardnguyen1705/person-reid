@@ -103,3 +103,4 @@ Other pretrained result: [wandb](https://wandb.ai/hiennguyen9874/rep-reid-v2)
 - Heatmap visualize
 - Light Reid
 - ReRanking & GPU ReRanking
+- Re-train with fixed resnet version (docs/fixed_resnet.png)
