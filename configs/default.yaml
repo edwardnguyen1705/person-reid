@@ -1,5 +1,8 @@
 timezone: Asia/Ho_Chi_Minh
 
+wandb_project: rep-reid-v2
+wandb_entity: hiennguyen9874
+
 data:
   name: market1501
   image_size: [256, 128]
