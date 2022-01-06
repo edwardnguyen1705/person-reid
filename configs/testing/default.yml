@@ -1,0 +1,4 @@
+testing:
+  distance_mode: euclidean
+  flip_inference: False
+  test_on_ema: False

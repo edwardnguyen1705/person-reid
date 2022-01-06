@@ -1,7 +1,7 @@
 import os
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(os.path.join(os.path.dirname(__file__)))
 
 import torch
 import warnings
@@ -12,7 +12,13 @@ from typing import Any
 from engine.trainers.simple import SimpleTrainer
 from engine.option import default_args
 from engine.hooks.checkpointer import get_run_id
-from utils import gen_run_id, get_checkpoint_dir, read_cfg
+from utils import (
+    gen_run_id,
+    get_checkpoint_dir,
+    read_cfg,
+    merge_cfg,
+    check_cfg_conflict,
+)
 
 
 def main_worker(gpu: int, ngpus_per_node: int, args: Any):
@@ -28,7 +34,27 @@ def main_worker(gpu: int, ngpus_per_node: int, args: Any):
 if __name__ == "__main__":
     args = default_args()
 
-    cfg = read_cfg(args.cfg)
+    check_cfg_conflict(
+        [
+            read_cfg(args.cfg_source),
+            read_cfg(args.cfg_data),
+            read_cfg(args.cfg_model),
+            read_cfg(args.cfg_train),
+            read_cfg(args.cfg_test),
+            read_cfg(args.cfg_loss),
+        ]
+    )
+
+    cfg = merge_cfg(
+        [
+            read_cfg(args.cfg_source),
+            read_cfg(args.cfg_data),
+            read_cfg(args.cfg_model),
+            read_cfg(args.cfg_train),
+            read_cfg(args.cfg_test),
+            read_cfg(args.cfg_loss),
+        ]
+    )
 
     if args.gpu is not None:
         warnings.warn(

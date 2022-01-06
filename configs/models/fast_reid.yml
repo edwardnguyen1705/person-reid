@@ -1,0 +1,51 @@
+base: default.yml
+
+model:
+  name: Baseline
+  num_classes: 751
+  feature_dim: 512
+
+  backbone:
+    name: resnet
+
+    resnet:
+      resnext: False
+      with_se: False
+      num_layer: 50
+      with_d: False
+      resnext_type: null
+      with_ibn_a: False
+      last_stride: 1
+      activation:
+        name: ReLU
+        inplace: true
+
+      attention: # build_attention for more information
+        enable: True
+        name: NonLocalBlock
+        rd_ratio: 0.0625 # -1 it mean hidden_channel = 1 in nonlocal block
+        cam_batchnorm: True
+        pam_batchnorm: True
+
+    pretrained: True
+    progress: True
+
+  pooling:
+    name: GeneralizedMeanPoolingP
+
+  neck:
+    name: BNNeck
+    out_channels: null # not work with BNNeck
+    type_norm: 2d
+    bias_freeze: True
+    activation: # not work with BNNeck
+      name: SiLU
+      inplace: true
+
+  head:
+    name: CircleSoftmax
+    scale: 64 # not work with Linear
+    margin: 0.35 # not work with Linear
+    k: 1 # not work with Linear
+
+  feature_pos: after

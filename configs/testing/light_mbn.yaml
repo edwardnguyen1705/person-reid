@@ -1,0 +1,6 @@
+base: default.yml
+
+testing:
+  distance_mode: cosine
+  flip_inference: True
+  test_on_ema: False

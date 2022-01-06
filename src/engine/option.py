@@ -4,10 +4,40 @@ import argparse
 def default_args():
     parser = argparse.ArgumentParser(description="")
     parser.add_argument(
-        "--cfg",
-        default="configs/default.yaml",
+        "--cfg-source",
+        default="configs/sources/peta.yml",
         type=str,
-        help="path to config file",
+        help="path to data source config",
+    )
+    parser.add_argument(
+        "--cfg-data",
+        default="configs/data/default.yml",
+        type=str,
+        help="path to data hyperparameter config",
+    )
+    parser.add_argument(
+        "--cfg-model",
+        default="configs/models/default.yml",
+        type=str,
+        help="path to model config",
+    )
+    parser.add_argument(
+        "--cfg-loss",
+        default="configs/losses/default.yml",
+        type=str,
+        help="path to loss config",
+    )
+    parser.add_argument(
+        "--cfg-train",
+        default="configs/training/default.yml",
+        type=str,
+        help="path to training hyperparameter config",
+    )
+    parser.add_argument(
+        "--cfg-test",
+        default="configs/testing/default.yml",
+        type=str,
+        help="path to testing hyperparameter config",
     )
     parser.add_argument(
         "--world-size",

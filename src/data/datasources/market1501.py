@@ -1,14 +1,18 @@
-import re
 import os
 import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+
+import re
 from tqdm import tqdm
 
+from base_datasource import BaseDatasource
 
-class Market1501(object):
-    url = {
-        "Market-1501-v15.09.15.zip": "1xi80U2hEut1bLOFQdBxmUQlgqPu2b07a",
-    }
 
+__all__ = ["Market1501"]
+
+
+class Market1501(BaseDatasource):
     def __init__(
         self,
         root,
@@ -61,13 +65,13 @@ class Market1501(object):
                     raise FileExistsError
 
     def process_dir(self, path, relabel=False, ignore_junk=False):
-        data = []
         pattern = re.compile(r"([-\d]+)_c(\d)s(\d)_([-\d]+)")
 
         pid_container = set()
         camid_containter = set()
         frames_container = set()
 
+        data = []
         for img in os.listdir(path):
             name, ext = os.path.splitext(img)
             if ext == ".jpg":
@@ -75,27 +79,19 @@ class Market1501(object):
                 person_id, camera_id, seq, frame = map(
                     int, pattern.search(name).groups()
                 )
-                if person_id == -1:
-                    continue
-                pid_container.add(person_id)
-                camid_containter.add(camera_id)
-                frames_container.add(self._re_frame(camera_id, seq, frame))
-        pid2label = {pid: label for label, pid in enumerate(pid_container)}
-
-        for img in os.listdir(path):
-            name, ext = os.path.splitext(img)
-            if ext == ".jpg":
-                img_path = os.path.join(path, img)
-                person_id, camera_id, seq, frame = map(
-                    int, pattern.search(name).groups()
-                )
-
                 if ignore_junk and person_id == -1:
                     continue
 
-                if relabel:
-                    person_id = pid2label[person_id]
+                pid_container.add(person_id)
+                camid_containter.add(camera_id)
+                frames_container.add(self._re_frame(camera_id, seq, frame))
+
                 data.append((img_path, person_id, camera_id))
+
+        pid2label = {pid: label for label, pid in enumerate(pid_container)}
+
+        if relabel:
+            data = list(map(lambda x: (x[0], pid2label[x[1]], x[2]), data))
 
         return data, pid_container, camid_containter, frames_container
 

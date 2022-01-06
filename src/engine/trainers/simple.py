@@ -93,8 +93,8 @@ class SimpleTrainer(BaseTrainer):
 
     def build_datasource(self):
         return build_datasource(
-            name=self.cfg["data"]["name"],
-            root=self.args.data_root,
+            cfg=self.cfg["data"],
+            data_root=self.args.data_root,
         )
 
     def build_train_loader(self):
@@ -221,9 +221,9 @@ class SimpleTrainer(BaseTrainer):
                     hooks.Writer(total_iterations=len(self.train_dataloader)),
                     hooks.Wandb(
                         config={**self.cfg, **vars(self.args)},
-                        project=self.config["wandb"]["project"],
+                        project=self.cfg["wandb"]["project"],
                         run_id=self.args.run_id,
-                        entity=self.config["wandb"]["entity"],
+                        entity=self.cfg["wandb"]["entity"],
                         group=None,
                         sync_tensorboard=True,
                     ),

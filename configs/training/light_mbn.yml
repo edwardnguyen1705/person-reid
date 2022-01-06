@@ -1,0 +1,31 @@
+base: default.yml
+
+optimizer:
+  name: adam
+  lr: 6.0e-4
+  adam:
+    beta1: 0.9
+    beta2: 0.999
+    weight_decay: 5.0e-4
+    amsgrad: False
+
+freeze:
+  enable: True
+  layers: [backbone, global_branch, partial_branch, channel_branch]
+  epochs: 5
+
+lr_scheduler:
+  enable: True
+  name: WarmupCosineAnnealingLR
+
+  WarmupCosineAnnealingLR:
+    max_iters: 150
+    delay_iters: 30
+    eta_min_lr: 6.0e-7
+    warmup_factor: 0.01
+    warmup_iters: 10
+    warmup_method: linear
+
+trainer:
+  epochs: 150
+  amp: True

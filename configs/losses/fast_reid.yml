@@ -1,0 +1,13 @@
+base: default.yml
+
+loss:
+  name: 1.0 * CrossEntropy + 1.0 * TripletLoss
+  cross_entropy:
+    epsilon: 0.1
+    reduction: sum
+  triplet:
+    margin: 0.0
+    distance_mode: euclidean
+    hard_mining: True
+    norm_feature: False
+    eps: 1.0e-8

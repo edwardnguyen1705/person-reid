@@ -1,0 +1,46 @@
+base: default.yml
+
+model:
+  name: LightMBN
+  num_classes: 751
+  feature_dim: 512
+
+  backbone:
+    name: osnet
+
+    osnet:
+      width: x1.0
+      ibn: False
+
+      attention:
+        enable: True
+        name: GlobalContext
+        rd_ratio: 0.0625 # it mean hidden_channel = 1 in nonlocal block
+        cam_batchnorm: True
+        pam_batchnorm: True
+
+      activation:
+        name: ReLU
+        inplace: true
+
+      pretrained: True
+
+  pooling:
+    name: GeneralizedMeanPoolingP
+
+  neck:
+    name: BNNeck
+    out_channels: null # not work with BNNeck
+    type_norm: 2d
+    bias_freeze: True
+    activation: # not work with BNNeck
+      name: SiLU
+      inplace: true
+
+  head:
+    name: Linear
+    scale: null
+    margin: null
+    k: null
+
+  feature_pos: before

@@ -1,53 +1,59 @@
-import copy
-import json
+import os
 import yaml
-from pathlib import Path
-from collections import OrderedDict
+import copy
+from functools import reduce
+from itertools import combinations
 from collections.abc import Mapping
 
 
-__all__ = ["read_cfg", "read_json", "write_json", "dict_dotter"]
+__all__ = ["read_cfg", "merge_cfg", "check_cfg_conflict"]
+
+
+def dotter(mixed, key="", dots={}):
+    if isinstance(mixed, dict):
+        for (k, v) in mixed.items():
+            dots = dotter(mixed[k], "%s.%s" % (key, k) if key else k, dots)
+    else:
+        dots[key] = mixed
+
+    return dots
+
+
+def update(d, u):
+    r"""deep update dict.
+    copied from here: https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
+    """
+    for k, v in u.items():
+        d[k] = update(d.get(k, {}), v) if isinstance(v, Mapping) else v
+    return d
 
 
 def read_cfg(path_cfg: str):
-    r"""read config yml file, return dict"""
+    assert os.path.exists(path_cfg), path_cfg
 
-    def update(d, u):
-        r"""deep update dict.
-        copied from here: https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
-        """
-        for k, v in u.items():
-            d[k] = update(d.get(k, {}), v) if isinstance(v, Mapping) else v
-        return d
+    r"""read config yml file, return dict"""
 
     cfg = yaml.safe_load(open(path_cfg))
 
     if "base" not in cfg:
         return cfg
 
-    base_cfg = yaml.safe_load(open(cfg["base"]))
+    base_cfg = read_cfg(os.path.join(os.path.dirname(path_cfg), cfg["base"]))
+
     cfg = update(base_cfg, cfg)
 
     return cfg
 
 
-def read_json(fname):
-    fname = Path(fname)
-    with fname.open("rt") as handle:
-        return json.load(handle, object_hook=OrderedDict)
+def merge_cfg(list_cfg):
+    return reduce(lambda a, b: update(a, b), list_cfg, {})
 
 
-def write_json(content, fname):
-    fname = Path(fname)
-    with fname.open("wt") as handle:
-        json.dump(content, handle, indent=4, sort_keys=False)
+def check_cfg_conflict(list_cfg):
+    for a, b in list(combinations([dotter(x, dots=dict()) for x in list_cfg], r=2)):
+        for key in a.keys():
+            if key == "base":
+                continue
 
-
-def dict_dotter(mixed, key="", dots={}):
-    if isinstance(mixed, dict):
-        for (k, v) in mixed.items():
-            dict_dotter(mixed[k], "%s.%s" % (key, k) if key else k)
-    else:
-        dots[key] = mixed
-
-    return dots
+            if key in b.keys():
+                raise ValueError("Conflict keys key: " + key)
