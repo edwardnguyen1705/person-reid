@@ -17,6 +17,7 @@ __all__ = [
     "batch_to_device",
     "get_num_workers",
     "get_batch_size",
+    "select_device",
 ]
 
 
@@ -120,3 +121,26 @@ def get_num_workers(num_workers: int, batch_size: int, world_size: int):
     return min(
         os.cpu_count() // world_size, batch_size if batch_size > 1 else 0, num_workers  # type: ignore
     )
+
+
+def select_device(device=""):
+    device = str(device).strip().lower().replace("cuda:", "")
+
+    cpu = device == "cpu"
+
+    if cpu:
+        os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
+    elif device:
+        os.environ["CUDA_VISIBLE_DEVICES"] = device
+
+        assert (
+            torch.cuda.is_available()
+        ), f"CUDA unavailable, invalid device {device} requested"
+
+    cuda = not cpu and torch.cuda.is_available()
+
+    if cpu:
+        warnings.warn("Using CPU!")
+
+    return torch.device("cuda:0" if cuda else "cpu")

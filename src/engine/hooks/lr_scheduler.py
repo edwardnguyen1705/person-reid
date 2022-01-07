@@ -14,20 +14,8 @@ class LrScheduler(HookBase):
         if self.cfg["enable"]:
             self.lr_scheduler = build_lr_scheduler(cfg, optimizer, total_iterations)
 
-    # def after_step(self):
-    #     # It will warning https://discuss.pytorch.org/t/optimizer-step-before-lr-scheduler-step-error-using-gradscaler/92930/3
-    #     if self.lr_scheduler is not None and self.cfg["name"] in [
-    #         "CyclicLR",
-    #         "OneCycleLR",
-    #     ]:
-    #         self.lr_scheduler.step()
-
     def after_train_epoch(self):
         if self.lr_scheduler is not None and self.cfg["start"] <= self.trainer.epoch:
-            # if self.cfg["name"] not in [
-            #     "CyclicLR",
-            #     "OneCycleLR",
-            # ]:
             self.lr_scheduler.step()
 
     def state_dict(self):

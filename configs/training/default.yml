@@ -1,7 +1,7 @@
 timezone: Asia/Ho_Chi_Minh
 
 wandb:
-  project: rep-reid-v2
+  project: person-reid
   entity: hiennguyen9874
 
 optimizer:

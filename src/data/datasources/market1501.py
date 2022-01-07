@@ -47,15 +47,19 @@ class Market1501(BaseDatasource):
             self.frames_container["gallery"],
         ) = self.process_dir(gallery_dir, relabel=False, ignore_junk=True)
 
-    def get_data(self, mode="train"):
-        if mode == "train":
+        self.check_exists("train")
+        self.check_exists("query")
+        self.check_exists("gallery")
+
+    def get_data(self, phase: str = "train"):
+        if phase == "train":
             return self.train
-        elif mode == "query":
+        elif phase == "query":
             return self.query
-        elif mode == "gallery":
+        elif phase == "gallery":
             return self.gallery
         else:
-            raise ValueError("mode error")
+            raise ValueError("phase error")
 
     def _check_file_exits(self):
         r"""check all image in datasource exists"""
@@ -157,3 +161,17 @@ class Market1501(BaseDatasource):
 
     def get_classes(self):
         return self.pid_container["train"]
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument(
+        "--data-root",
+        default="/home/coder/project/datasets/market1501/processed",
+        type=str,
+    )
+    args = parser.parse_args()
+
+    datasource = Market1501(args.data_root)

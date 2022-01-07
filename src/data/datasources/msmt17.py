@@ -56,6 +56,10 @@ class MSMT17(BaseDatasource):
                 self.camid_containter["train"] | self.camid_containter["val"]
             )
 
+        self.check_exists("train")
+        self.check_exists("query")
+        self.check_exists("gallery")
+
     def get_data(self, mode="train"):
         if mode == "train":
             return self.train
@@ -95,3 +99,17 @@ class MSMT17(BaseDatasource):
 
     def get_classes(self):
         return self.pid_container["train"]
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument(
+        "--data-root",
+        default="/home/coder/project/datasets/msmt17/MSMT17_V1",
+        type=str,
+    )
+    args = parser.parse_args()
+
+    datasource = MSMT17(args.data_root)

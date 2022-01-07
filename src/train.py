@@ -5,7 +5,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__)))
 
 import torch
 import warnings
-import torch.multiprocessing as mp
 
 from typing import Any
 
@@ -18,6 +17,7 @@ from utils import (
     read_cfg,
     merge_cfg,
     check_cfg_conflict,
+    select_device,
 )
 
 
@@ -56,40 +56,19 @@ if __name__ == "__main__":
         ]
     )
 
-    if args.gpu is not None:
-        warnings.warn(
-            "You have chosen a specific GPU. This will completely "
-            "disable data parallelism."
-        )
-
-    if args.dist_url == "env://" and args.world_size == -1:
-        args.world_size = int(os.environ["WORLD_SIZE"])
-
-    args.distributed = args.world_size > 1 or args.multiprocessing_distributed
+    device = select_device(args.device)
 
     if args.resume_path == "":
         args.run_id = gen_run_id(cfg["timezone"])
-
     elif args.resume_run_id != "":
         args.run_id = args.resume_run_id
     else:
         args.run_id = get_run_id(args.resume_path)
+
     args.checkpoint_dir = get_checkpoint_dir(args.run_id, args.checkpoint_dir)
 
-    ngpus_per_node = torch.cuda.device_count()
+    trainer = SimpleTrainer(args, cfg, device)
+    trainer.train()
 
-    if args.multiprocessing_distributed:
-        # Since we have ngpus_per_node processes per node, the total world_size
-        # needs to be adjusted accordingly
-        args.world_size = ngpus_per_node * args.world_size
-        # Use torch.multiprocessing.spawn to launch distributed processes: the
-        # main_worker process function
-        mp.spawn(
-            main_worker,
-            nprocs=ngpus_per_node,
-            args=(ngpus_per_node, (args, cfg)),
-        )
-    else:
-        args.rank = -1
-        # Simply call main_worker function
-        main_worker(args.gpu, ngpus_per_node, (args, cfg))
+
+# python src/train.py --device 0 --cfg-source configs/sources/msmt17.yml  --cfg-data configs/data/fast_reid.yml  --cfg-loss configs/losses/fast_reid.yml --cfg-model configs/models/fast_reid.yml --cfg-train configs/training/fast_reid.yml --cfg-test configs/testing/fast_reid.yml --val --val-step 10 --test-from-checkpoint --data-root /home/coder/project/datasets/msmt17/MSMT17_V1
