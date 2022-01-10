@@ -1,14 +1,18 @@
-import re
 import os
 import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+
+import re
 from tqdm import tqdm
 
+from base_datasource import BaseDatasource
 
-class Market1501(object):
-    url = {
-        "Market-1501-v15.09.15.zip": "1xi80U2hEut1bLOFQdBxmUQlgqPu2b07a",
-    }
 
+__all__ = ["Market1501"]
+
+
+class Market1501(BaseDatasource):
     def __init__(
         self,
         root,
@@ -43,15 +47,19 @@ class Market1501(object):
             self.frames_container["gallery"],
         ) = self.process_dir(gallery_dir, relabel=False, ignore_junk=True)
 
-    def get_data(self, mode="train"):
-        if mode == "train":
+        self.check_exists("train")
+        self.check_exists("query")
+        self.check_exists("gallery")
+
+    def get_data(self, phase: str = "train"):
+        if phase == "train":
             return self.train
-        elif mode == "query":
+        elif phase == "query":
             return self.query
-        elif mode == "gallery":
+        elif phase == "gallery":
             return self.gallery
         else:
-            raise ValueError("mode error")
+            raise ValueError("phase error")
 
     def _check_file_exits(self):
         r"""check all image in datasource exists"""
@@ -61,13 +69,13 @@ class Market1501(object):
                     raise FileExistsError
 
     def process_dir(self, path, relabel=False, ignore_junk=False):
-        data = []
         pattern = re.compile(r"([-\d]+)_c(\d)s(\d)_([-\d]+)")
 
         pid_container = set()
         camid_containter = set()
         frames_container = set()
 
+        data = []
         for img in os.listdir(path):
             name, ext = os.path.splitext(img)
             if ext == ".jpg":
@@ -75,27 +83,19 @@ class Market1501(object):
                 person_id, camera_id, seq, frame = map(
                     int, pattern.search(name).groups()
                 )
-                if person_id == -1:
-                    continue
-                pid_container.add(person_id)
-                camid_containter.add(camera_id)
-                frames_container.add(self._re_frame(camera_id, seq, frame))
-        pid2label = {pid: label for label, pid in enumerate(pid_container)}
-
-        for img in os.listdir(path):
-            name, ext = os.path.splitext(img)
-            if ext == ".jpg":
-                img_path = os.path.join(path, img)
-                person_id, camera_id, seq, frame = map(
-                    int, pattern.search(name).groups()
-                )
-
                 if ignore_junk and person_id == -1:
                     continue
 
-                if relabel:
-                    person_id = pid2label[person_id]
+                pid_container.add(person_id)
+                camid_containter.add(camera_id)
+                frames_container.add(self._re_frame(camera_id, seq, frame))
+
                 data.append((img_path, person_id, camera_id))
+
+        pid2label = {pid: label for label, pid in enumerate(pid_container)}
+
+        if relabel:
+            data = list(map(lambda x: (x[0], pid2label[x[1]], x[2]), data))
 
         return data, pid_container, camid_containter, frames_container
 
@@ -161,3 +161,17 @@ class Market1501(object):
 
     def get_classes(self):
         return self.pid_container["train"]
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument(
+        "--data-root",
+        default="/home/coder/project/datasets/market1501/processed",
+        type=str,
+    )
+    args = parser.parse_args()
+
+    datasource = Market1501(args.data_root)

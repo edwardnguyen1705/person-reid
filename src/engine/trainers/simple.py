@@ -25,18 +25,15 @@ from data import (
 from models import build_model
 from optimizers import build_optimizers
 from losses import WrapLoss
-from utils import ModelEmaV2, check_any, get_local_rank, get_num_workers
+from utils import ModelEmaV2, check_any, get_num_workers
 from metrics import accuracy, cosine_dist, euclidean_dist, evaluate_rank
 from extractor import feature_extractor
 
 
 class SimpleTrainer(BaseTrainer):
-    def __init__(self, args, cfg):
-        super(SimpleTrainer, self).__init__(args)
+    def __init__(self, args, cfg, device):
+        super(SimpleTrainer, self).__init__(args, device)
         self.cfg = cfg
-
-        # Step 1: Setup distributed training
-        self._setup_dist()
 
         # Step 2: Create datasource, dataloader
         self.datasource = self.build_datasource()
@@ -47,16 +44,13 @@ class SimpleTrainer(BaseTrainer):
         self.auto_scale_hyperparams()
 
         # Step 4: Create model
-        self.model = self.build_model()
-
-        # Step 6: Send model to device
-        self.model = self._create_distributed_model(self.model)
+        self.model = self.build_model().to(self.device)
 
         # Step 5: Create optimizer
         self.optimizer = self.build_optimizers()
 
         # Step 5: Create criterion
-        self.criterion = self.build_losses()
+        self.criterion = self.build_losses().to(self.device)
 
         # Step 6: Create grad scaler
         self.scaler = GradScaler(
@@ -71,18 +65,16 @@ class SimpleTrainer(BaseTrainer):
 
         # Step ?: Create ema model
         self.model_ema = None
-        if self._is_root() and self.cfg["ema"]["enable"]:
+        if self.cfg["ema"]["enable"]:
             self.model_ema = ModelEmaV2(
                 self.model, decay=self.cfg["ema"]["decay"], device=None
             )
 
-        self.checkpointer = None
-        if self._is_root():
-            self.checkpointer = hooks.Checkpointer(
-                train_metrics=self.get_train_metric_dict(),
-                val_metrics=self.get_val_metric_dict(),
-                checkpoint_dir=self.args.checkpoint_dir,
-            )
+        self.checkpointer = hooks.Checkpointer(
+            train_metrics=self.get_train_metric_dict(),
+            val_metrics=self.get_val_metric_dict(),
+            checkpoint_dir=self.args.checkpoint_dir,
+        )
 
         self.register_hooks(self.build_hooks())
 
@@ -93,8 +85,8 @@ class SimpleTrainer(BaseTrainer):
 
     def build_datasource(self):
         return build_datasource(
-            name=self.cfg["data"]["name"],
-            root=self.args.data_root,
+            cfg=self.cfg["data"],
+            data_root=self.args.data_root,
         )
 
     def build_train_loader(self):
@@ -135,18 +127,14 @@ class SimpleTrainer(BaseTrainer):
             "dataset": dataset,
             "sampler": sampler,
             "batch_size": self.cfg["data"]["train"]["batch_size"],
-            "num_workers": get_num_workers(
-                self.cfg["data"]["num_workers"],
-                self.cfg["data"]["train"]["batch_size"],
-                self.args.world_size,
-            ),
+            "num_workers": self.cfg["data"]["num_workers"],
             "pin_memory": True,
             "drop_last": False,
             "shuffle": False,
         }
 
         if self.args.background_generator:
-            return DataLoaderX(device=get_local_rank(self.args.rank), **dataloader_args)
+            return DataLoaderX(device=self.device, **dataloader_args)
         return DataLoader(**dataloader_args)
 
     def build_test_loader(self):
@@ -185,16 +173,6 @@ class SimpleTrainer(BaseTrainer):
     def build_model(self):
         return build_model(self.cfg["model"])
 
-    def _update_dist_batch_size(self, get_dist_batch_size: Callable[[int], int]):
-        self.cfg["data"]["train"]["batch_size"] = get_dist_batch_size(
-            self.cfg["data"]["train"]["batch_size"]
-        )
-
-    def _update_dist_worker(self, get_dist_worker: Callable[[int], int]):
-        self.cfg["data"]["num_workers"] = get_dist_worker(
-            self.cfg["data"]["num_workers"]
-        )
-
     def build_optimizers(self):
         return build_optimizers(self.cfg["optimizer"], self.model)
 
@@ -215,21 +193,20 @@ class SimpleTrainer(BaseTrainer):
                 )
             )
 
-        if self._is_root():
-            ret.extend(
-                [
-                    hooks.Writer(total_iterations=len(self.train_dataloader)),
-                    hooks.Wandb(
-                        config={**self.cfg, **vars(self.args)},
-                        project=self.config["wandb"]["project"],
-                        run_id=self.args.run_id,
-                        entity=self.config["wandb"]["entity"],
-                        group=None,
-                        sync_tensorboard=True,
-                    ),
-                    self.checkpointer,
-                ]
-            )
+        ret.extend(
+            [
+                hooks.Writer(total_iterations=len(self.train_dataloader)),
+                hooks.Wandb(
+                    config={**self.cfg, **vars(self.args)},
+                    project=self.cfg["wandb"]["project"],
+                    run_id=self.args.run_id,
+                    entity=self.cfg["wandb"]["entity"],
+                    group=None,
+                    sync_tensorboard=True,
+                ),
+                self.checkpointer,
+            ]
+        )
 
         return ret
 
@@ -261,9 +238,6 @@ class SimpleTrainer(BaseTrainer):
     def before_train_epoch(self):
         super().before_train_epoch()
 
-        if self.args.distributed:
-            self.train_dataloader.sampler.set_epoch(self.epoch)
-
         self.model.train()
         self.optimizer.zero_grad(set_to_none=True)
         self.prefetcher = DataPrefetcher(
@@ -285,9 +259,6 @@ class SimpleTrainer(BaseTrainer):
             loss, loss_item = self.criterion(feat, score, target)
 
             check_any(loss)
-
-            if self.args.multiprocessing_distributed:
-                loss *= self.args.world_size
 
         self.scaler.scale(loss).backward()
 
@@ -311,38 +282,36 @@ class SimpleTrainer(BaseTrainer):
 
             self.optimizer.zero_grad(set_to_none=True)
 
-        if self._is_root():
-            if isinstance(pred_cls, (list, tuple)):
-                total_acc1, total_acc5, total_acc10 = 0, 0, 0
-                for x in pred_cls:
-                    acc1, acc5, acc10 = accuracy(x, target, topk=(1, 5, 10))
-                    total_acc1, total_acc5, total_acc10 = (
-                        total_acc1 + acc1,
-                        total_acc5 + acc5,
-                        total_acc10 + acc10,
-                    )
-                acc1, acc5, acc10 = (
-                    total_acc1 / len(pred_cls),
-                    total_acc5 / len(pred_cls),
-                    total_acc10 / len(pred_cls),
+        if isinstance(pred_cls, (list, tuple)):
+            total_acc1, total_acc5, total_acc10 = 0, 0, 0
+            for x in pred_cls:
+                acc1, acc5, acc10 = accuracy(x, target, topk=(1, 5, 10))
+                total_acc1, total_acc5, total_acc10 = (
+                    total_acc1 + acc1,
+                    total_acc5 + acc5,
+                    total_acc10 + acc10,
                 )
-            elif isinstance(pred_cls, torch.Tensor):
-                acc1, acc5, acc10 = accuracy(pred_cls, target, topk=(1, 5, 10))
-            else:
-                raise RuntimeError("pred_cls has type not support")
+            acc1, acc5, acc10 = (
+                total_acc1 / len(pred_cls),
+                total_acc5 / len(pred_cls),
+                total_acc10 / len(pred_cls),
+            )
+        elif isinstance(pred_cls, torch.Tensor):
+            acc1, acc5, acc10 = accuracy(pred_cls, target, topk=(1, 5, 10))
+        else:
+            raise RuntimeError("pred_cls has type not support")
 
-            return {
-                "loss": loss.item(),
-                "id_loss": loss_item[0].item(),
-                "ranking_loss": loss_item[1].item(),
-                "top1": acc1.item(),
-                "top5": acc5.item(),
-                "top10": acc10.item(),
-            }
-        return None
+        return {
+            "loss": loss.item(),
+            "id_loss": loss_item[0].item(),
+            "ranking_loss": loss_item[1].item(),
+            "top1": acc1.item(),
+            "top5": acc5.item(),
+            "top10": acc10.item(),
+        }
 
     def check_is_val_epoch(self, epoch: int):
-        if self._is_root() and self.args.val and epoch >= self.args.val_step:
+        if self.args.val and epoch >= self.args.val_step:
             if epoch % self.args.val_step == 0:
                 return True
 
@@ -354,7 +323,7 @@ class SimpleTrainer(BaseTrainer):
     def before_val_epoch(self):
         self.model_test = (
             self.model_ema.module
-            if ((self.model_ema != None) and self.testing.test_on_ema)
+            if ((self.model_ema != None) and self.cfg["testing"]["test_on_ema"])
             else self.model
         )
 
@@ -403,7 +372,7 @@ class SimpleTrainer(BaseTrainer):
         super().before_test_step()
         self.model_test = (
             self.model_ema.module
-            if ((self.model_ema != None) and self.testing.test_on_ema)
+            if ((self.model_ema != None) and self.cfg["testing"]["test_on_ema"])
             else self.model
         )
 

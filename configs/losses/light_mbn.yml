@@ -1,0 +1,12 @@
+loss:
+  name: 0.5 * CrossEntropy + 0.5 * MultiSimilarityLoss
+
+  cross_entropy:
+    epsilon: 0.1
+    reduction: sum
+
+  multi_similarity:
+    alpha: 2.0
+    beta: 40.0
+    gamma: 0.7
+    eps: 1.0e-8

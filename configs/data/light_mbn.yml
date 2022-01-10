@@ -1,0 +1,19 @@
+base: default.yml
+
+data:
+  name: market1501
+  image_size: [384, 128]
+  num_workers: 4
+  train:
+    batch_size: 48
+    num_instances: 6
+    transform:
+      autoaugmentation: False
+      random_erasing: True
+      cutout: True
+      random2translate: True
+      lgt: True
+      random_grayscale: False
+
+  test:
+    batch_size: 256

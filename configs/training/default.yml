@@ -1,0 +1,85 @@
+timezone: Asia/Ho_Chi_Minh
+
+wandb:
+  project: person-reid
+  entity: hiennguyen9874
+
+optimizer:
+  name: adam
+  lr: 0.00035
+  specified_lr:
+    enable: False
+    lr: 0.1
+    layers: [head]
+  adam:
+    beta1: 0.9
+    beta2: 0.99
+    weight_decay: 0.0005
+    amsgrad: False
+  sgd:
+    momentum: 0.9
+    weight_decay: 0.0005
+    dampening: 0
+    nesterov: False
+  adamW:
+    beta1: 0.9
+    beta2: 0.999
+    weight_decay: 0.0001
+
+freeze:
+  enable: False
+  layers: [backbone]
+  epochs: 10
+
+lr_scheduler:
+  enable: False
+  name: MultiStepLR
+  start: 1
+
+  WarmupMultiStepLR:
+    steps: [40, 90]
+    gamma: 0.1
+    warmup_factor: 0.01
+    warmup_iters: 10
+    warmup_method: linear
+
+  ReduceLROnPlateau:
+    factor: 0.1
+    patience: 10
+    min_lr: 1.0e-7
+
+  MultiStepLR:
+    steps: [40, 70]
+    gamma: 0.1
+
+  WarmupCosineAnnealingLR:
+    max_iters: 120
+    delay_iters: 30
+    eta_min_lr: 7.0e-7
+    warmup_factor: 0.01
+    warmup_iters: 10
+    warmup_method: linear
+
+  CosineAnnealingLR:
+    max_iters: 120
+    eta_min_lr: 7.0e-7
+
+  # OneCycleLR:
+  #   epochs: 120
+  #   max_lr: 0.01
+  #   div_factor: 25
+  #   anneal_strategy: cos # or linear
+
+iters_to_accumulate: 1
+
+ema:
+  enable: False
+  decay: 0.9998
+
+clip_grad_norm_:
+  enable: False
+  max_norm: 10.0
+
+trainer:
+  epochs: 120
+  amp: True

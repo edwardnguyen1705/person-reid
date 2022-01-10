@@ -13,14 +13,16 @@ from utils import is_root, MetricTracker
 
 
 class BaseTrainer(object):
-    def __init__(self, args):
+    def __init__(self, args, device):
         self._hooks = []
         self.args = args
+        self.device = device
+
+        self.cuda = device.type != "cpu"
 
     def register_hooks(self, hooks):
-        if self._is_root():
-            self.train_metrics = self.get_train_metric_dict()
-            self.train_tracker = MetricTracker(*list(self.train_metrics.keys()))
+        self.train_metrics = self.get_train_metric_dict()
+        self.train_tracker = MetricTracker(*list(self.train_metrics.keys()))
 
         hooks = [h for h in hooks if h is not None]
         for h in hooks:
@@ -75,7 +77,8 @@ class BaseTrainer(object):
         for h in self._hooks:
             h.after_train()
 
-        torch.cuda.empty_cache()
+        if self.cuda:
+            torch.cuda.empty_cache()
 
     def before_epoch(self):
         for h in self._hooks:
@@ -89,12 +92,10 @@ class BaseTrainer(object):
         for h in self._hooks:
             h.before_train_epoch()
 
-        if self._is_root():
-            self.train_tracker.reset()
+        self.train_tracker.reset()
 
     def after_train_epoch(self):
-        if self._is_root():
-            self.result_train_epoch = self.train_tracker.result()
+        self.result_train_epoch = self.train_tracker.result()
 
         for h in self._hooks:
             h.after_train_epoch()
@@ -107,13 +108,10 @@ class BaseTrainer(object):
         for h in self._hooks:
             h.after_step()
 
-        if self._is_root():
-            for metric in self.train_metrics.keys():
-                assert metric in self.result_train_step
+        for metric in self.train_metrics.keys():
+            assert metric in self.result_train_step
 
-                self.train_tracker.update(
-                    key=metric, value=self.result_train_step[metric]
-                )
+            self.train_tracker.update(key=metric, value=self.result_train_step[metric])
 
     def break_step(self):
         for h in self._hooks:
@@ -147,86 +145,6 @@ class BaseTrainer(object):
         for h in self._hooks:
             h.end()
 
-    def _is_root(self):
-        return bool(
-            is_root(
-                self.args.multiprocessing_distributed,
-                self.args.rank,
-                self.args.ngpus_per_node,
-            )
-        )
-
-    def _setup_dist(self):
-        if self.args.gpu is not None and self._is_root():
-            print("Use GPU: {} for training".format(self.args.gpu))
-
-        if self.args.distributed:
-            if self.args.dist_url == "env://" and self.args.rank == -1:
-                self.args.rank = int(os.environ["RANK"])
-
-            if self.args.multiprocessing_distributed:
-                # For multiprocessing distributed training, rank needs to be the
-                # global rank among all the processes
-                self.args.rank = (
-                    self.args.rank * self.args.ngpus_per_node + self.args.gpu
-                )
-
-            dist.init_process_group(
-                backend=self.args.dist_backend,
-                init_method=self.args.dist_url,
-                world_size=self.args.world_size,
-                rank=self.args.rank,
-            )
-
-    def _create_distributed_model(self, model):
-        if torch.cuda.is_available():
-            torch.backends.cudnn.benchmark = True
-            if self.args.distributed:
-                model = nn.SyncBatchNorm.convert_sync_batchnorm(model)
-
-                # For multiprocessing distributed, DistributedDataParallel constructor
-                # should always set the single device scope, otherwise,
-                # DistributedDataParallel will use all available devices.
-                if self.args.gpu is not None:
-                    torch.cuda.set_device(self.args.gpu)
-                    model.cuda(self.args.gpu)
-                    # When using a single GPU per process and per
-                    # DistributedDataParallel, we need to divide the batch size
-                    # ourselves based on the total number of GPUs we have
-
-                    self._update_dist_batch_size(
-                        lambda x: int(x / self.args.ngpus_per_node)
-                    )
-
-                    self._update_dist_worker(
-                        lambda x: int(
-                            (x + self.args.ngpus_per_node - 1)
-                            / self.args.ngpus_per_node
-                        )
-                    )
-
-                    model = torch.nn.parallel.DistributedDataParallel(
-                        model, device_ids=[self.args.gpu], find_unused_parameters=True
-                    )
-                else:
-                    model.cuda()
-                    # DistributedDataParallel will divide and allocate batch_size to all
-                    # available GPUs if device_ids are not set
-                    model = torch.nn.parallel.DistributedDataParallel(
-                        model, find_unused_parameters=True
-                    )
-            elif self.args.gpu is not None:
-                torch.cuda.set_device(self.args.gpu)
-                model = model.cuda(self.args.gpu)
-            else:
-                model = torch.nn.DataParallel(model).cuda()
-        elif self._is_root():
-            print("Using CPU, this will be slow")
-
-        self.device = next(model.parameters()).device
-
-        return model
-
     def check_is_val_epoch(self, epoch: int):
         return False
 
@@ -240,12 +158,6 @@ class BaseTrainer(object):
         raise NotImplementedError
 
     def run_val_epoch(self):
-        raise NotImplementedError
-
-    def _update_dist_batch_size(self, get_batch_size: Callable[[int], int]):
-        raise NotImplementedError
-
-    def _update_dist_worker(self, get_worker: Callable[[int], int]):
         raise NotImplementedError
 
     def build_datasource(self):

@@ -17,3 +17,4 @@ albumentations==1.0.3
 pandas==1.3.1
 lmdb==1.2.1
 gdown==4.0.2
+Cython

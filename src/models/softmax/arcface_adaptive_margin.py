@@ -83,7 +83,7 @@ if __name__ == "__main__":
     #     name="market1501", root="/home/coder/project/datasets/market1501/processed/"
     # )
 
-    config = read_config("configs/fast_reid.yaml", base=True)
+    config = read_config("configs/fast_reid.yml", base=True)
 
     print({k: str(v) for k, v in dotter(config).items()})
 

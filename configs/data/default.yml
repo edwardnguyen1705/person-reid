@@ -1,0 +1,13 @@
+data:
+  image_size: [256, 128]
+
+  train:
+    transform:
+      autoaugmentation: False
+      random_erasing: True
+      cutout: False
+      random2translate: False
+      lgt: False
+      random_grayscale: False
+
+  test: {}
