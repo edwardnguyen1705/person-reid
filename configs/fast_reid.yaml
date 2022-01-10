@@ -24,29 +24,16 @@ model:
   feature_dim: 512
 
   backbone:
-    name: resnet
+    name: resnest
 
-    resnet:
-      resnext: False
-      with_se: False
+    resnest:
       num_layer: 50
-      with_d: False
-      resnext_type: null
-      with_ibn_a: False
       last_stride: 1
       activation:
         name: ReLU
-        inplace: true
-
-      attention: # build_attention for more information
-        enable: True
-        name: NonLocalBlock
-        rd_ratio: 0.0625 # -1 it mean hidden_channel = 1 in nonlocal block
-        cam_batchnorm: True
-        pam_batchnorm: True
-
-    pretrained: True
-    progress: True
+        inplace: True
+      pretrained: True
+      progress: True
 
   pooling:
     name: GeneralizedMeanPoolingP

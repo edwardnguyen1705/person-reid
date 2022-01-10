@@ -8,12 +8,17 @@ from .resnet import build_resnet
 from .mobilenetv3 import build_mobilenetv3
 from .efficientnet import build_efficientnet
 from .efficientnetv2_rw import build_efficientnetv2_rw
+from .resnest import build_resnest
 
 
 def build_backbone(cfg) -> Tuple[nn.Module, int, nn.Module]:
     if cfg["name"] == "resnet":
         model = build_resnet(cfg["resnet"])
         return model, model.feature_dim, model.block
+
+    elif cfg["name"] == "resnest":
+        model = build_resnest(cfg["resnest"])
+        return model, model.feature_dim
 
     elif cfg["name"] == "osnet":
         model = build_osnet(cfg["osnet"])

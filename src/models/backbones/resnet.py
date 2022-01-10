@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 from torch.hub import load_state_dict_from_url
-from typing import Type, Callable, Union, List, Optional
+from typing import Type, Callable, Union, List, Optional, Dict, Any
 
 from models.block.ibn import IBN
 from models.block.semodule import SEModule
@@ -174,6 +174,7 @@ class ResNet(nn.Module):
         with_se: bool = False,
         non_layers: Optional[List[int]] = None,
         attention_cfg: dict = None,
+        block_args: Optional[Dict[str, Any]] = None,
     ):
         self.groups = groups
         self.base_width = width_per_group
@@ -215,11 +216,12 @@ class ResNet(nn.Module):
         # self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, ceil_mode=True)
         self.layer1 = self._make_layer(
             block,
-            self.inplanes,
+            64,
             layers[0],
             ibn=ibn_cfg[0],
             activation=activation,
             avg_down=avg_down,
+            block_args=block_args,
         )
         self.layer2 = self._make_layer(
             block,
@@ -229,6 +231,7 @@ class ResNet(nn.Module):
             ibn=ibn_cfg[1],
             activation=activation,
             avg_down=avg_down,
+            block_args=block_args,
         )
         self.layer3 = self._make_layer(
             block,
@@ -238,6 +241,7 @@ class ResNet(nn.Module):
             ibn=ibn_cfg[2],
             activation=activation,
             avg_down=avg_down,
+            block_args=block_args,
         )
         self.layer4 = self._make_layer(
             block,
@@ -247,6 +251,7 @@ class ResNet(nn.Module):
             ibn=ibn_cfg[3],
             activation=activation,
             avg_down=avg_down,
+            block_args=block_args,
         )
         self.feature_dim = 512 * block.expansion
 
@@ -265,7 +270,9 @@ class ResNet(nn.Module):
         ibn: Optional[str] = None,
         activation: Callable = nn.ReLU(),
         avg_down: bool = False,
+        block_args: Optional[Dict[str, Any]] = None,
     ):
+        block_args = block_args or {}
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             if not avg_down:
@@ -311,6 +318,7 @@ class ResNet(nn.Module):
                 downsample=downsample,
                 activation=activation,
                 with_se=self.with_se,
+                **block_args
             )
         ]
 
@@ -325,6 +333,7 @@ class ResNet(nn.Module):
                     base_width=self.base_width,
                     activation=activation,
                     with_se=self.with_se,
+                    **block_args
                 )
             )
 

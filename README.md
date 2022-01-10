@@ -8,6 +8,7 @@
     - SeResnet
     - Resnext
     - Resnet-D
+    - ResNest
   - OSNet
   - Efficientnet b0-b4
   - MobilenetV3

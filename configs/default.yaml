@@ -114,6 +114,15 @@ model:
       pretrained: True
       progress: True
 
+    resnest:
+      num_layer: 50
+      last_stride: 2
+      activation:
+        name: ReLU
+        inplace: True
+      pretrained: True
+      progress: True
+
   pooling:
     name: AvgPooling2d
 

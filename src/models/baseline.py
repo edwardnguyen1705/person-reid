@@ -33,7 +33,7 @@ class Baseline(nn.Module):
 if __name__ == "__main__":
     from utils import read_cfg
 
-    cfg = read_cfg("configs/light_mbn.yaml")
+    cfg = read_cfg("configs/fast_reid.yaml")
 
     from ptflops import get_model_complexity_info
 
