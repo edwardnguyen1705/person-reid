@@ -1,7 +1,6 @@
 base: default.yml
 
 data:
-  name: market1501
   image_size: [384, 128]
   num_workers: 4
   train:

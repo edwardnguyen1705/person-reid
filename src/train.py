@@ -71,4 +71,10 @@ if __name__ == "__main__":
     trainer.train()
 
 
-# python src/train.py --device 0 --cfg-source configs/sources/msmt17.yml  --cfg-data configs/data/fast_reid.yml  --cfg-loss configs/losses/fast_reid.yml --cfg-model configs/models/fast_reid.yml --cfg-train configs/training/fast_reid.yml --cfg-test configs/testing/fast_reid.yml --val --val-step 10 --test-from-checkpoint --data-root /home/coder/project/datasets/msmt17/MSMT17_V1
+"""
+python src/train.py --device 0 --cfg-source configs/sources/msmt17.yml \
+    --cfg-data configs/data/fast_reid.yml  --cfg-loss configs/losses/fast_reid.yml \
+    --cfg-model configs/models/fast_reid.yml --cfg-train configs/training/fast_reid.yml \
+    --cfg-test configs/testing/fast_reid.yml --val --val-step 10 --test-from-checkpoint \
+    --data-root /home/coder/project/datasets/msmt17/MSMT17_V1
+"""

@@ -42,12 +42,11 @@ class Checkpointer(HookBase):
         self.trainer.lr_scheduler.load_state_dict(state["lr_scheduler"])
         self.trainer.scaler.load_state_dict(state["scaler"])
 
-        if self.trainer._is_root():
-            for metric, _ in self.train_metrics.items():
-                self.train_best_metrics[metric] = state["train_best_{}".format(metric)]
+        for metric, _ in self.train_metrics.items():
+            self.train_best_metrics[metric] = state["train_best_{}".format(metric)]
 
-            for metric, _ in self.val_metrics.items():
-                self.val_best_metrics[metric] = state["val_best_{}".format(metric)]
+        for metric, _ in self.val_metrics.items():
+            self.val_best_metrics[metric] = state["val_best_{}".format(metric)]
 
     def _get_state_dict(self):
         state = {
@@ -63,11 +62,10 @@ class Checkpointer(HookBase):
             else None,
         }
 
-        if self.trainer._is_root():
-            for metric, value in self.train_best_metrics.items():
-                state["train_best_{}".format(metric)] = value
-            for metric, value in self.val_best_metrics.items():
-                state["val_best_{}".format(metric)] = value
+        for metric, value in self.train_best_metrics.items():
+            state["train_best_{}".format(metric)] = value
+        for metric, value in self.val_best_metrics.items():
+            state["val_best_{}".format(metric)] = value
         return state
 
     def _get_best_metric(self, metrics, results, best_metrics):
@@ -109,8 +107,6 @@ class Checkpointer(HookBase):
         )
 
     def after_epoch(self):
-        if not self.trainer._is_root():
-            return
         state_dict = self._get_state_dict()
 
         # Save last checkpoint
