@@ -1,13 +1,13 @@
 base: default.yml
 
 optimizer:
-  name: adam
+  name: adamW
   lr: 3.5e-4
-  adam:
+  weight_decay: 0.0005
+
+  adamW:
     beta1: 0.9
     beta2: 0.999
-    weight_decay: 5.0e-4
-    amsgrad: False
 
 freeze:
   enable: True

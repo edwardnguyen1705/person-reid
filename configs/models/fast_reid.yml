@@ -2,7 +2,6 @@ base: default.yml
 
 model:
   name: Baseline
-  num_classes: 751
   feature_dim: 512
 
   backbone:
@@ -20,10 +19,10 @@ model:
         name: ReLU
         inplace: true
 
-      attention: # build_attention for more information
+      attention:
         enable: True
         name: NonLocalBlock
-        rd_ratio: 0.0625 # -1 it mean hidden_channel = 1 in nonlocal block
+        rd_ratio: 0.0625
         cam_batchnorm: True
         pam_batchnorm: True
 
@@ -31,25 +30,25 @@ model:
     progress: True
 
   head:
-    name: HashingHead
+    name: BNHead
 
-    HashingHead:
+    BNHead:
       pooling:
         name: GeneralizedMeanPoolingP
 
       neck:
         name: BNNeck
-        out_channels: null # not work with BNNeck
+        out_channels: null
         type_norm: 2d
         bias_freeze: True
-        activation: # not work with BNNeck
+        activation:
           name: SiLU
           inplace: true
 
       head:
         name: CircleSoftmax
-        scale: 64 # not work with Linear
-        margin: 0.35 # not work with Linear
-        k: 1 # not work with Linear
+        scale: 64
+        margin: 0.35
+        k: 1
 
       feature_pos: after

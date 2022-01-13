@@ -1,7 +1,6 @@
 model:
   name: Baseline
 
-  num_classes: 751
   feature_dim: 512
 
   backbone:

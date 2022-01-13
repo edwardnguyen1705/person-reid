@@ -45,8 +45,8 @@ class SimpleTrainer(BaseTrainer):
         self.train_dataloader = self.build_train_loader()
         self.query_dataloader, self.gallery_dataloader = self.build_test_loader()
 
-        # Step 3: Scale numclasses
-        self.auto_scale_hyperparams()
+        # # Step 3: Scale numclasses
+        # self.auto_scale_hyperparams()
 
         # Step 4: Create model
         self.model = self.build_model().to(self.device)

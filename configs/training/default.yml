@@ -5,26 +5,27 @@ wandb:
   entity: hiennguyen9874
 
 optimizer:
-  name: adam
-  lr: 0.00035
-  specified_lr:
-    enable: False
-    lr: 0.1
-    layers: [head]
+  name: adamW
+  lr: 3.5e-4
+  weight_decay: 0.0005
+  bias_lr_factor: null
+  bias_weight_decay: null
+  norm_weight_decay: null
+  overrides: {}
+
   adam:
     beta1: 0.9
     beta2: 0.99
-    weight_decay: 0.0005
     amsgrad: False
+
   sgd:
-    momentum: 0.9
-    weight_decay: 0.0005
+    momentum: 0.937
     dampening: 0
-    nesterov: False
+    nesterov: True
+
   adamW:
     beta1: 0.9
     beta2: 0.999
-    weight_decay: 0.0001
 
 freeze:
   enable: False
