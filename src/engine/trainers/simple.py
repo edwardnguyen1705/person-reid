@@ -25,8 +25,14 @@ from data import (
 from models import build_model
 from optimizers import build_optimizers
 from losses import WrapLoss
-from utils import ModelEmaV2, check_any, get_num_workers
-from metrics import accuracy, cosine_dist, euclidean_dist, evaluate_rank
+from utils import ModelEmaV2, check_any
+from metrics import (
+    accuracy,
+    cosine_dist,
+    euclidean_dist,
+    hamming_distance,
+    evaluate_rank,
+)
 from extractor import feature_extractor
 
 
@@ -350,8 +356,14 @@ class SimpleTrainer(BaseTrainer):
             distance = euclidean_dist(
                 query_feature, gallery_feature, sqrt=False, clip=False
             )
-        else:
+        elif self.cfg["testing"]["distance_mode"] == "cosine":
             distance = cosine_dist(query_feature, gallery_feature, alpha=1)
+        elif self.cfg["testing"]["distance_mode"] == "hamming":
+            distance = hamming_distance(query_feature, gallery_feature)
+        else:
+            raise ValueError(
+                "cfg[testing][distance_mode] must be one of euclidean, cosine, hamming"
+            )
 
         cmc, all_AP, all_INP = evaluate_rank(
             distance, query_label, gallery_label, query_camera, gallery_camera

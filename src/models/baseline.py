@@ -8,18 +8,17 @@ import torch.nn as nn
 from typing import Optional, Tuple
 
 from models.backbones import build_backbone
-from models.heads.embedding import Embedding
+from models.heads import build_head
 
 
 class Baseline(nn.Module):
-    def __init__(self, cfg: dict):
+    def __init__(self, cfg: dict, num_classes: int):
         super(Baseline, self).__init__()
 
         self.backbone, self.feature_dim, *_ = build_backbone(cfg["backbone"])
 
-        self.head = Embedding(
-            cfg=cfg,
-            backbone_feature_dim=self.feature_dim,
+        self.head = build_head(
+            cfg=cfg["head"], in_channels=self.feature_dim, num_classes=num_classes
         )
 
     def forward(
@@ -33,11 +32,11 @@ class Baseline(nn.Module):
 if __name__ == "__main__":
     from utils import read_cfg
 
-    cfg = read_cfg("configs/fast_reid.yaml")
+    cfg = read_cfg("configs/models/fast_reid.yml")
 
     from ptflops import get_model_complexity_info
 
-    model = Baseline(cfg["model"])
+    model = Baseline(cfg["model"], 751)
 
     macs, params = get_model_complexity_info(
         model.eval(),

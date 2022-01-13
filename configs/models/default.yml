@@ -99,22 +99,47 @@ model:
       pretrained: True
       progress: True
 
-  pooling:
-    name: AvgPooling2d
-
-  neck:
-    name: BNNeck
-    out_channels: null # not work with BNNeck
-    type_norm: 2d
-    bias_freeze: True
-    activation: # not work with BNNeck
-      name: SiLU
-      inplace: true
-
   head:
-    name: Linear
-    scale: null # not work with Linear
-    margin: null # not work with Linear
-    k: null # not work with Linear
+    name: BNHead
 
-  feature_pos: before
+    BNHead:
+      pooling:
+        name: AvgPooling2d
+
+      neck:
+        name: BNNeck
+        out_channels: null # not work with BNNeck
+        type_norm: 2d
+        bias_freeze: True
+        activation: # not work with BNNeck
+          name: SiLU
+          inplace: true
+
+      head:
+        name: Linear
+        scale: null # not work with Linear
+        margin: null # not work with Linear
+        k: null # not work with Linear
+
+      feature_pos: before
+
+    HashingHead:
+      pooling:
+        name: AvgPooling2d
+
+      neck:
+        name: BNNeck
+        out_channels: null # not work with BNNeck
+        type_norm: 2d
+        bias_freeze: True
+        activation: # not work with BNNeck
+          name: SiLU
+          inplace: true
+
+      head:
+        name: Linear
+        scale: null # not work with Linear
+        margin: null # not work with Linear
+        k: null # not work with Linear
+
+      feature_pos: before

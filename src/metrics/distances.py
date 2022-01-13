@@ -10,6 +10,7 @@ __all__ = [
     "self_cosine_similarity",
     "self_cosine_dist",
     "self_euclidean_dist",
+    "hamming_distance",
 ]
 
 
@@ -40,6 +41,15 @@ def euclidean_dist(
     dist = dist.sqrt() if sqrt else dist
 
     return dist
+
+
+def hamming_distance(x: torch.Tensor, y: torch.Tensor):
+    _, dim = x.shape
+
+    x = (x - 0.5) * 2
+    y = (y - 0.5) * 2
+
+    return dim - (torch.mm(x, y.t()) + dim) / 2
 
 
 def self_cosine_similarity(x: torch.Tensor) -> torch.Tensor:

@@ -15,7 +15,7 @@ model:
       attention:
         enable: True
         name: GlobalContext
-        rd_ratio: 0.0625 # it mean hidden_channel = 1 in nonlocal block
+        rd_ratio: 0.0625
         cam_batchnorm: True
         pam_batchnorm: True
 
@@ -25,22 +25,26 @@ model:
 
       pretrained: True
 
-  pooling:
-    name: GeneralizedMeanPoolingP
-
-  neck:
-    name: BNNeck
-    out_channels: null # not work with BNNeck
-    type_norm: 2d
-    bias_freeze: True
-    activation: # not work with BNNeck
-      name: SiLU
-      inplace: true
-
   head:
-    name: Linear
-    scale: null
-    margin: null
-    k: null
+    name: BNHead
 
-  feature_pos: before
+    BNHead:
+      pooling:
+        name: GeneralizedMeanPoolingP
+
+      neck:
+        name: BNNeck
+        out_channels: null
+        type_norm: 2d
+        bias_freeze: True
+        activation:
+          name: SiLU
+          inplace: true
+
+      head:
+        name: Linear
+        scale: null
+        margin: null
+        k: null
+
+      feature_pos: before

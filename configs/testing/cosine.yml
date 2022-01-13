@@ -2,5 +2,5 @@ base: default.yml
 
 testing:
   distance_mode: cosine
-  flip_inference: True
+  flip_inference: False
   test_on_ema: False

@@ -12,9 +12,12 @@ from models.softmax import build_softmax
 from models.activations import cfg_to_activation
 
 
-class Embedding(nn.Module):
-    def __init__(self, cfg, backbone_feature_dim: int):
-        super(Embedding, self).__init__()
+__all__ = ["BNHead"]
+
+
+class BNHead(nn.Module):
+    def __init__(self, cfg, in_channels: int, num_classes: int):
+        super(BNHead, self).__init__()
         self.feature_pos = cfg["feature_pos"]
         self.neck_type_norm = cfg["neck"]["type_norm"]
 
@@ -23,11 +26,11 @@ class Embedding(nn.Module):
         self.pool_layer = build_pooling(cfg["pooling"]["name"])
 
         if neck_out_channels is None:
-            neck_out_channels = backbone_feature_dim
+            neck_out_channels = in_channels
 
         self.bottleneck = build_neck(
             name=cfg["neck"]["name"],
-            in_channels=backbone_feature_dim,
+            in_channels=in_channels,
             out_channels=neck_out_channels,
             type_norm=cfg["neck"]["type_norm"],
             bias_freeze=cfg["neck"]["bias_freeze"],
@@ -37,7 +40,7 @@ class Embedding(nn.Module):
         self.softmax = build_softmax(
             name=cfg["head"]["name"],
             in_features=neck_out_channels,
-            out_features=cfg["num_classes"],
+            out_features=num_classes,
             scale=cfg["head"]["scale"],
             margin=cfg["head"]["margin"],
             k=cfg["head"]["k"],

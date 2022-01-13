@@ -8,13 +8,13 @@ import torch
 import torch.nn as nn
 
 from models.layers.common import Conv
-from models.heads.embedding import Embedding
+from models.heads import build_head
 from models.split_backbone import get_split_backbone
 from models.layers.top_dropblock import BatchFeatureErase_Top
 
 
 class LightMBN(nn.Module):
-    def __init__(self, cfg: dict):
+    def __init__(self, cfg: dict, num_classes: int):
         super(LightMBN, self).__init__()
 
         feature_dim = cfg["feature_dim"]
@@ -63,9 +63,8 @@ class LightMBN(nn.Module):
         self.par_2_reduction = copy.deepcopy(reduction)
         self.par_g_reduction = copy.deepcopy(reduction)
 
-        head = Embedding(
-            cfg=cfg,
-            backbone_feature_dim=feature_dim,
+        head = build_head(
+            cfg=cfg["head"], in_channels=feature_dim, num_classes=num_classes
         )
 
         self.glo_drop_head = copy.deepcopy(head)
