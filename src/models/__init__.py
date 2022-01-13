@@ -5,12 +5,12 @@ from .baseline import Baseline
 from .light_mbn import LightMBN
 
 
-def build_model(cfg: dict) -> Type[Union[Baseline, LightMBN]]:
+def build_model(cfg: dict, num_classes: int) -> Type[Union[Baseline, LightMBN]]:
     if cfg["name"] == "Baseline":
-        return Baseline(cfg)
+        return Baseline(cfg, num_classes)
 
     elif cfg["name"] == "LightMBN":
-        return LightMBN(cfg)
+        return LightMBN(cfg, num_classes)
 
     else:
         raise ValueError(

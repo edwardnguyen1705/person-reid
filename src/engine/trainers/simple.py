@@ -5,7 +5,6 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", 
 
 import torch
 import numpy as np
-from typing import Callable
 from multiprocessing import Manager
 from torch.nn.utils import clip_grad_norm_
 from torch.cuda.amp import autocast, GradScaler
@@ -177,7 +176,7 @@ class SimpleTrainer(BaseTrainer):
         return query_dataloader, gallery_dataloader
 
     def build_model(self):
-        return build_model(self.cfg["model"])
+        return build_model(self.cfg["model"], len(self.datasource.get_classes()))
 
     def build_optimizers(self):
         return build_optimizers(self.cfg["optimizer"], self.model)
@@ -216,8 +215,8 @@ class SimpleTrainer(BaseTrainer):
 
         return ret
 
-    def auto_scale_hyperparams(self):
-        self.cfg["model"]["num_classes"] = len(self.datasource.get_classes())
+    # def auto_scale_hyperparams(self):
+    # self.cfg["model"]["num_classes"] = len(self.datasource.get_classes())
 
     def get_train_metric_dict(self):
         return {
