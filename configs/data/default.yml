@@ -3,6 +3,7 @@ data:
 
   train:
     transform:
+      trivialaugment: False
       autoaugmentation: False
       random_erasing: True
       cutout: False

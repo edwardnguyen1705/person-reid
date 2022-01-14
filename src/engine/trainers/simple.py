@@ -98,6 +98,7 @@ class SimpleTrainer(BaseTrainer):
         transform = build_transform(
             self.cfg["data"]["image_size"],
             is_training=True,
+            use_trivialaugment=self.cfg["data"]["train"]["transform"]["trivialaugment"],
             use_autoaugmentation=self.cfg["data"]["train"]["transform"][
                 "autoaugmentation"
             ],

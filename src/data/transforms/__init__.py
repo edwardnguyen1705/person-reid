@@ -11,6 +11,7 @@ from .random_erasing import RandomErasing
 from .cutout import Cutout
 from .lgt import LGT
 from .denormalize import Denormalize
+from .aug_lib import TrivialAugment
 
 
 NORM_MEAN = [0.485, 0.456, 0.406]
@@ -20,6 +21,7 @@ NORM_STD = [0.229, 0.224, 0.225]
 def build_transform(
     image_size: Tuple[int, int],
     is_training: bool = True,
+    use_trivialaugment: bool = False,
     use_autoaugmentation: bool = False,
     use_random_erasing: bool = True,
     use_cutout: bool = False,
@@ -33,6 +35,9 @@ def build_transform(
     res = []
 
     if is_training:
+        if use_trivialaugment:
+            res.append(T.RandomApply([TrivialAugment()], p=0.1))
+
         # Auto augmentation
         if use_autoaugmentation:
             res.append(T.RandomApply([AutoAugment()], p=0.1))
