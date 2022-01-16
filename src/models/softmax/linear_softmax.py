@@ -41,4 +41,4 @@ class LinearSoftmax(nn.Module):
 
         inputs = inputs.mul(self.scale)
 
-        return inputs, logits.mul(self.scale).detach()
+        return inputs, logits.mul(self.scale)

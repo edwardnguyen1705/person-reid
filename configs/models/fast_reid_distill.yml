@@ -1,0 +1,107 @@
+base: default_distill.yml
+
+model:
+  name: Baseline
+
+  backbone:
+    name: resnet
+
+    resnet:
+      resnext: False
+      with_se: False
+      num_layer: 34
+      with_d: False
+      resnext_type: null
+      with_ibn_a: False
+      last_stride: 1
+      activation:
+        name: ReLU
+        inplace: true
+
+      attention:
+        enable: True
+        name: NonLocalBlock
+        rd_ratio: 0.0625
+        cam_batchnorm: True
+        pam_batchnorm: True
+
+      pretrained: True
+      progress: True
+
+  head:
+    name: BNHead
+
+    BNHead:
+      pooling:
+        name: GeneralizedMeanPoolingP
+
+      neck:
+        name: BNNeck
+        out_channels: null
+        type_norm: 2d
+        bias_freeze: True
+        activation:
+          name: SiLU
+          inplace: true
+
+      head:
+        name: CircleSoftmax
+        scale: 64
+        margin: 0.35
+        k: 1
+
+      feature_pos: after
+
+model_t:
+  name: Baseline
+
+  weight_path: weights/fastreid_resnet101.pth
+
+  backbone:
+    name: resnet
+
+    resnet:
+      resnext: False
+      with_se: False
+      num_layer: 101
+      with_d: False
+      resnext_type: null
+      with_ibn_a: False
+      last_stride: 1
+      activation:
+        name: ReLU
+        inplace: true
+
+      attention:
+        enable: True
+        name: NonLocalBlock
+        rd_ratio: 0.0625
+        cam_batchnorm: True
+        pam_batchnorm: True
+
+      pretrained: True
+      progress: True
+
+  head:
+    name: BNHead
+
+    BNHead:
+      pooling:
+        name: GeneralizedMeanPoolingP
+
+      neck:
+        name: BNNeck
+        out_channels: null
+        type_norm: 2d
+        bias_freeze: True
+        activation:
+          name: SiLU
+          inplace: true
+
+      head:
+        name: CircleSoftmax
+        scale: 64
+        margin: 0.35
+        k: 1
+
+      feature_pos: after

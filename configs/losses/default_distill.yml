@@ -1,0 +1,30 @@
+loss:
+  WrapLoss:
+    name: 1.0 * CrossEntropy + 1.0 * TripletLoss
+
+    cross_entropy:
+      epsilon: 0.1
+      reduction: sum
+    triplet:
+      margin: 0.3
+      distance_mode: euclidean
+      hard_mining: True
+      norm_feature: False
+      eps: 1.0e-8
+    cosface:
+      margin: 0.3
+      gamma: 128
+    multi_similarity:
+      alpha: 2.0
+      beta: 50.0
+      gamma: 1.0
+      eps: 1.0e-8
+    circle:
+      margin: 0.3
+      gamma: 128
+    focal:
+      gamma: 1.5
+      alpha: 0.25
+      reduction: sum
+  JSDIVLoss:
+    t: 16

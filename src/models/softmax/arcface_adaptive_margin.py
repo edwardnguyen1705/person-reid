@@ -37,7 +37,7 @@ class ArcFaceAdaptiveMargin(nn.Module):
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         inputs = self.sub_center(inputs)
 
-        pred_cls = inputs.clone().mul(self.scale).detach()
+        pred_cls = inputs.clone().mul(self.scale)
 
         with torch.no_grad():
             ms = self.margins[targets]
