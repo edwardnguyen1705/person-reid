@@ -11,7 +11,7 @@ from models.block.semodule import SEModule
 
 
 class PLRAttention(nn.Module):
-    r"""Attention module from 'Learning Diverse Features with Part-Level Resolution for Person Re-Identification'"""
+    r"""Attention module from '(PLR-OSNet) Learning Diverse Features with Part-Level Resolution for Person Re-Identification'"""
 
     def __init__(
         self,

@@ -215,18 +215,18 @@ class ResNet(nn.Module):
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         # self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, ceil_mode=True)
         self.layer1 = self._make_layer(
-            block,
-            64,
-            layers[0],
+            block=block,
+            planes=64,
+            blocks=layers[0],
             ibn=ibn_cfg[0],
             activation=activation,
             avg_down=avg_down,
             block_args=block_args,
         )
         self.layer2 = self._make_layer(
-            block,
-            128,
-            layers[1],
+            block=block,
+            planes=128,
+            blocks=layers[1],
             stride=2,
             ibn=ibn_cfg[1],
             activation=activation,
@@ -234,9 +234,9 @@ class ResNet(nn.Module):
             block_args=block_args,
         )
         self.layer3 = self._make_layer(
-            block,
-            256,
-            layers[2],
+            block=block,
+            planes=256,
+            blocks=layers[2],
             stride=2,
             ibn=ibn_cfg[2],
             activation=activation,
@@ -244,9 +244,9 @@ class ResNet(nn.Module):
             block_args=block_args,
         )
         self.layer4 = self._make_layer(
-            block,
-            512,
-            layers[3],
+            block=block,
+            planes=512,
+            blocks=layers[3],
             stride=last_stride,
             ibn=ibn_cfg[3],
             activation=activation,

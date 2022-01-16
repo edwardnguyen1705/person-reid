@@ -1,0 +1,288 @@
+model:
+  name: Baseline
+
+  backbone:
+    name: resnet
+    resnet:
+      resnext: False
+      with_se: False
+      num_layer: 50
+      with_d: False
+      resnext_type: null
+      with_ibn_a: False
+      last_stride: 1
+      activation:
+        name: ReLU
+        inplace: true
+
+      attention: # build_attention for more information
+        enable: False
+        name: NonLocalBlock
+        rd_ratio: -1 # -1 it mean hidden_channel = 1 in nonlocal block
+        cam_batchnorm: False
+        pam_batchnorm: False
+
+      pretrained: True
+      progress: True
+
+    osnet:
+      width: x1.0
+      ibn: False
+
+      attention:
+        enable: False
+        name: FPBAttention
+        rd_ratio: -1 # it mean hidden_channel = 1 in nonlocal block
+        cam_batchnorm: True
+        pam_batchnorm: True
+
+      activation:
+        name: ReLU
+        inplace: true
+      pretrained: True
+
+    osnet_ain:
+      width: x1.0
+
+      attention:
+        enable: False
+        name: FPBAttention
+        rd_ratio: -1 # it mean hidden_channel = 1 in nonlocal block
+        cam_batchnorm: True
+        pam_batchnorm: True
+
+      activation:
+        name: ReLU
+        inplace: true
+
+      pretrained: True
+
+    efficientnet:
+      version: b0 # b1, b2, b3, b4
+      remove_last_stride: False
+      activation:
+        name: SiLU
+        inplace: true
+      pretrained: True
+      progress: True
+
+    efficientnetv2_rw:
+      version: efficientnetv2_rw_t # or, gc_efficientnetv2_rw_t, efficientnetv2_rw_s, efficientnetv2_rw_m
+      activation:
+        name: SiLU
+        inplace: true
+      pretrained: True
+      progress: True
+
+    mobilenetv3:
+      activation1:
+        name: ReLU
+        inplace: true
+      activation2:
+        name: Hardswish
+        inplace: true
+      gate_fn:
+        name: Hardsigmoid
+        inplace: true
+      pretrained: True
+      progress: True
+
+    resnest:
+      num_layer: 50
+      last_stride: 2
+      activation:
+        name: ReLU
+        inplace: True
+      pretrained: True
+      progress: True
+
+  head:
+    name: BNHead
+
+    BNHead:
+      pooling:
+        name: AvgPooling2d
+
+      neck:
+        name: BNNeck
+        out_channels: null # not work with BNNeck
+        type_norm: 2d
+        bias_freeze: True
+        activation: # not work with BNNeck
+          name: SiLU
+          inplace: true
+
+      head:
+        name: Linear
+        scale: null # not work with Linear
+        margin: null # not work with Linear
+        k: null # not work with Linear
+
+      feature_pos: before
+
+    HashingHead:
+      pooling:
+        name: AvgPooling2d
+
+      neck:
+        name: BNNeck
+        out_channels: null # not work with BNNeck
+        type_norm: 2d
+        bias_freeze: True
+        activation: # not work with BNNeck
+          name: SiLU
+          inplace: true
+
+      head:
+        name: Linear
+        scale: null # not work with Linear
+        margin: null # not work with Linear
+        k: null # not work with Linear
+
+      feature_pos: before
+
+model_t:
+  name: Baseline
+
+  weight_path: weights/fastreid_resnet101.pth
+
+  backbone:
+    name: resnet
+
+    resnet:
+      resnext: False
+      with_se: False
+      num_layer: 101
+      with_d: False
+      resnext_type: null
+      with_ibn_a: False
+      last_stride: 1
+      activation:
+        name: ReLU
+        inplace: true
+
+      attention: # build_attention for more information
+        enable: False
+        name: NonLocalBlock
+        rd_ratio: -1 # -1 it mean hidden_channel = 1 in nonlocal block
+        cam_batchnorm: False
+        pam_batchnorm: False
+
+      pretrained: True
+      progress: True
+
+    osnet:
+      width: x1.0
+      ibn: False
+
+      attention:
+        enable: False
+        name: FPBAttention
+        rd_ratio: -1 # it mean hidden_channel = 1 in nonlocal block
+        cam_batchnorm: True
+        pam_batchnorm: True
+
+      activation:
+        name: ReLU
+        inplace: true
+      pretrained: True
+
+    osnet_ain:
+      width: x1.0
+
+      attention:
+        enable: False
+        name: FPBAttention
+        rd_ratio: -1 # it mean hidden_channel = 1 in nonlocal block
+        cam_batchnorm: True
+        pam_batchnorm: True
+
+      activation:
+        name: ReLU
+        inplace: true
+
+      pretrained: True
+
+    efficientnet:
+      version: b0 # b1, b2, b3, b4
+      remove_last_stride: False
+      activation:
+        name: SiLU
+        inplace: true
+      pretrained: True
+      progress: True
+
+    efficientnetv2_rw:
+      version: efficientnetv2_rw_t # or, gc_efficientnetv2_rw_t, efficientnetv2_rw_s, efficientnetv2_rw_m
+      activation:
+        name: SiLU
+        inplace: true
+      pretrained: True
+      progress: True
+
+    mobilenetv3:
+      activation1:
+        name: ReLU
+        inplace: true
+      activation2:
+        name: Hardswish
+        inplace: true
+      gate_fn:
+        name: Hardsigmoid
+        inplace: true
+      pretrained: True
+      progress: True
+
+    resnest:
+      num_layer: 50
+      last_stride: 2
+      activation:
+        name: ReLU
+        inplace: True
+      pretrained: True
+      progress: True
+
+  head:
+    name: BNHead
+
+    BNHead:
+      pooling:
+        name: AvgPooling2d
+
+      neck:
+        name: BNNeck
+        out_channels: null # not work with BNNeck
+        type_norm: 2d
+        bias_freeze: True
+        activation: # not work with BNNeck
+          name: SiLU
+          inplace: true
+
+      head:
+        name: Linear
+        scale: null # not work with Linear
+        margin: null # not work with Linear
+        k: null # not work with Linear
+
+      feature_pos: before
+
+    HashingHead:
+      pooling:
+        name: AvgPooling2d
+
+      neck:
+        name: BNNeck
+        out_channels: null # not work with BNNeck
+        type_norm: 2d
+        bias_freeze: True
+        activation: # not work with BNNeck
+          name: SiLU
+          inplace: true
+
+      head:
+        name: Linear
+        scale: null # not work with Linear
+        margin: null # not work with Linear
+        k: null # not work with Linear
+
+      feature_pos: before

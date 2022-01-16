@@ -38,4 +38,4 @@ class CosSoftmax(LinearSoftmax):
 
         inputs = inputs.mul(self.scale)
 
-        return inputs, logits.mul(self.scale).detach()
+        return inputs, logits.mul(self.scale)
