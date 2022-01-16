@@ -91,5 +91,6 @@ def default_args():
         action="store_true",
         help="Load all checkpoint and test to find best metric",
     )
+    parser.add_argument("--distill", action="store_true")
 
     return parser.parse_args()

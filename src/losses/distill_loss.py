@@ -14,6 +14,7 @@ __all__ = ["DistillLoss"]
 
 class DistillLoss(nn.Module):
     def __init__(self, cfg):
+        super(DistillLoss, self).__init__()
         self.wrap_loss = WrapLoss(cfg["WrapLoss"])
         self.jsdiv_loss = JSDIVLoss(cfg["JSDIVLoss"]["t"])
 
@@ -22,6 +23,6 @@ class DistillLoss(nn.Module):
 
         jsdiv_loss = self.jsdiv_loss(s_pred_cls, t_pred_cls)
 
-        loss_item = torch.cat((loss_item, jsdiv_loss), dim=0)
+        loss_item = torch.cat((loss_item, jsdiv_loss.unsqueeze(dim=0)), dim=0)
 
         return loss, loss_item

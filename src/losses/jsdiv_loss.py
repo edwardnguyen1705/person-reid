@@ -10,6 +10,7 @@ __all__ = ["JSDIVLoss"]
 
 class JSDIVLoss(nn.Module):
     def __init__(self, t: int = 16):
+        super(JSDIVLoss, self).__init__()
         self.t = t
         self.kldiv = KLLoss(t=t)
 

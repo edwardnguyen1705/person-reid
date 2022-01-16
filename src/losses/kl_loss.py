@@ -8,6 +8,7 @@ __all__ = ["KLLoss"]
 
 class KLLoss(nn.Module):
     def __init__(self, t: int = 4):
+        super(KLLoss, self).__init__()
         self.t = t
 
     def forward(self, logits_s: torch.Tensor, logits_t: torch.Tensor) -> torch.Tensor:

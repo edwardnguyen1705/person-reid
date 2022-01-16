@@ -1,0 +1,34 @@
+base: default.yml
+
+wandb:
+  project: person-reid-distill
+
+optimizer:
+  name: adamW
+  lr: 3.5e-4
+  weight_decay: 0.0005
+
+  adamW:
+    beta1: 0.9
+    beta2: 0.999
+
+freeze:
+  enable: True
+  layers: [backbone]
+  epochs: 5
+
+lr_scheduler:
+  enable: True
+  name: WarmupCosineAnnealingLR
+
+  WarmupCosineAnnealingLR:
+    max_iters: 150
+    delay_iters: 30
+    eta_min_lr: 7.0e-7
+    warmup_factor: 0.01
+    warmup_iters: 10
+    warmup_method: linear
+
+trainer:
+  epochs: 150
+  amp: True

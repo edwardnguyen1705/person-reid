@@ -35,9 +35,9 @@ from metrics import (
 from extractor import feature_extractor
 
 
-class SimpleTrainer(BaseTrainer):
+class DistillTrainer(BaseTrainer):
     def __init__(self, args, cfg, device):
-        super(SimpleTrainer, self).__init__(args, device)
+        super(DistillTrainer, self).__init__(args, device)
         self.cfg = cfg
 
         # Step 2: Create datasource, dataloader
@@ -190,10 +190,11 @@ class SimpleTrainer(BaseTrainer):
         for param in model_t.parameters():
             param.requires_grad_(False)
 
+        state = torch.load(
+            self.cfg["model_t"]["weight_path"], map_location=torch.device("cpu")
+        )
         model_t.load_state_dict(
-            torch.load(
-                self.cfg["model_t"]["weight_path"], map_location=torch.device("cpu")
-            ),
+            state["model"] if "model" in state else state,
             strict=True,
         )
 
@@ -244,6 +245,7 @@ class SimpleTrainer(BaseTrainer):
             "loss": True,
             "id_loss": True,
             "ranking_loss": True,
+            "jsdiv_loss": True,
             "top1": False,
             "top5": False,
             "top10": False,
@@ -334,6 +336,7 @@ class SimpleTrainer(BaseTrainer):
             "loss": loss.item(),
             "id_loss": loss_item[0].item(),
             "ranking_loss": loss_item[1].item(),
+            "jsdiv_loss": loss_item[2].item(),
             "top1": acc1.item(),
             "top5": acc5.item(),
             "top10": acc10.item(),

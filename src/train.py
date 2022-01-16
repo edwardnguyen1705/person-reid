@@ -8,7 +8,7 @@ import warnings
 
 from typing import Any
 
-from engine.trainers.simple import SimpleTrainer
+from engine.trainers import SimpleTrainer, DistillTrainer
 from engine.option import default_args
 from engine.hooks.checkpointer import get_run_id
 from utils import (
@@ -19,16 +19,6 @@ from utils import (
     check_cfg_conflict,
     select_device,
 )
-
-
-def main_worker(gpu: int, ngpus_per_node: int, args: Any):
-    args, cfg = args
-
-    args.gpu = gpu
-    args.ngpus_per_node = ngpus_per_node
-
-    trainer = SimpleTrainer(args, cfg)
-    trainer.train()
 
 
 if __name__ == "__main__":
@@ -67,7 +57,11 @@ if __name__ == "__main__":
 
     args.checkpoint_dir = get_checkpoint_dir(args.run_id, args.checkpoint_dir)
 
-    trainer = SimpleTrainer(args, cfg, device)
+    if args.distill:
+        trainer = DistillTrainer(args, cfg, device)
+    else:
+        trainer = SimpleTrainer(args, cfg, device)
+
     trainer.train()
 
 
