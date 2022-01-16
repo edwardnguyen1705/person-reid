@@ -26,8 +26,8 @@ model:
         cam_batchnorm: True
         pam_batchnorm: True
 
-    pretrained: True
-    progress: True
+      pretrained: True
+      progress: True
 
   head:
     name: BNHead

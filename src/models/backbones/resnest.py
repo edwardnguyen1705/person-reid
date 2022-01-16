@@ -264,6 +264,14 @@ def build_resnest(cfg: dict) -> ResNet:
     pretrained = cfg["pretrained"]
     progress = cfg["progress"]
 
+    attention_cfg = {
+        "enable": cfg["attention"]["enable"],
+        "name": cfg["attention"]["name"],
+        "rd_ratio": cfg["attention"]["rd_ratio"],
+        "cam_batchnorm": cfg["attention"]["cam_batchnorm"],
+        "pam_batchnorm": cfg["attention"]["pam_batchnorm"],
+    }
+
     blocks_cfg = {
         "14": ResNestBottleneck,
         "26": ResNestBottleneck,
@@ -301,7 +309,7 @@ def build_resnest(cfg: dict) -> ResNet:
         stem_width=stem_width[str(num_layer)],
         stem_type="deep",
         avg_down=True,
-        attention_cfg=None,
+        attention_cfg=attention_cfg,
         block_args=dict(radix=2, avd=True, avd_first=False),
     )
 
@@ -319,7 +327,7 @@ def build_resnest(cfg: dict) -> ResNet:
             ["classifier", "fc"],
         )
 
-        model.load_state_dict(state_dict, strict=True)
+        model.load_state_dict(state_dict, strict=not cfg["attention"]["enable"])
 
     return model
 

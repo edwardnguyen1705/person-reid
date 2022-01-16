@@ -5,6 +5,7 @@ model:
 
   backbone:
     name: resnet
+
     resnet:
       resnext: False
       with_se: False
@@ -95,6 +96,14 @@ model:
       activation:
         name: ReLU
         inplace: True
+
+      attention:
+        enable: False
+        name: FPBAttention
+        rd_ratio: 0.0625
+        cam_batchnorm: True
+        pam_batchnorm: True
+
       pretrained: True
       progress: True
 
