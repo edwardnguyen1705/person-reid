@@ -1,11 +1,11 @@
 base: default.yml
 
 optimizer:
-  name: adamW
+  name: adam
   lr: 6.0e-4
   weight_decay: 0.0005
 
-  adamW:
+  adam:
     beta1: 0.9
     beta2: 0.999
 
