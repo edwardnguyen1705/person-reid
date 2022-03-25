@@ -21,8 +21,8 @@ class DistillLoss(nn.Module):
     def forward(self, s_feat, s_score, s_pred_cls, t_pred_cls, targets):
         loss, loss_item = self.wrap_loss(s_feat, s_score, targets)
 
-        jsdiv_loss = self.jsdiv_loss(s_pred_cls, t_pred_cls)
+        jsdiv_loss = self.jsdiv_loss(s_pred_cls, t_pred_cls.detach())
 
         loss_item = torch.cat((loss_item, jsdiv_loss.unsqueeze(dim=0)), dim=0)
 
-        return loss, loss_item
+        return loss + jsdiv_loss, loss_item

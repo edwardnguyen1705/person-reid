@@ -122,7 +122,7 @@ class Checkpointer(HookBase):
                     self._save(f"val_best_{metric}.pth", state_dict)
 
     def _save_by_copy(self, from_filepath, to_filepath):
-        print(f"Saving {to_filepath}")
+        print(f"Copying {to_filepath}")
         shutil.copyfile(from_filepath, to_filepath)
 
     def before_test(self):

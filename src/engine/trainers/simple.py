@@ -58,9 +58,7 @@ class SimpleTrainer(BaseTrainer):
         self.criterion = self.build_losses().to(self.device)
 
         # Step 6: Create grad scaler
-        self.scaler = GradScaler(
-            enabled=torch.cuda.is_available() and self.cfg["trainer"]["amp"]
-        )
+        self.scaler = GradScaler(enabled=torch.cuda.is_available() and self.cfg["trainer"]["amp"])
 
         self.lr_scheduler = hooks.LrScheduler(
             self.cfg["lr_scheduler"],
@@ -71,9 +69,7 @@ class SimpleTrainer(BaseTrainer):
         # Step ?: Create ema model
         self.model_ema = None
         if self.cfg["ema"]["enable"]:
-            self.model_ema = ModelEmaV2(
-                self.model, decay=self.cfg["ema"]["decay"], device=None
-            )
+            self.model_ema = ModelEmaV2(self.model, decay=self.cfg["ema"]["decay"], device=None)
 
         self.checkpointer = hooks.Checkpointer(
             train_metrics=self.get_train_metric_dict(),
@@ -99,18 +95,12 @@ class SimpleTrainer(BaseTrainer):
             self.cfg["data"]["image_size"],
             is_training=True,
             use_trivialaugment=self.cfg["data"]["train"]["transform"]["trivialaugment"],
-            use_autoaugmentation=self.cfg["data"]["train"]["transform"][
-                "autoaugmentation"
-            ],
+            use_autoaugmentation=self.cfg["data"]["train"]["transform"]["autoaugmentation"],
             use_random_erasing=self.cfg["data"]["train"]["transform"]["random_erasing"],
             use_cutout=self.cfg["data"]["train"]["transform"]["cutout"],
-            use_random2translate=self.cfg["data"]["train"]["transform"][
-                "random2translate"
-            ],
+            use_random2translate=self.cfg["data"]["train"]["transform"]["random2translate"],
             use_lgt=self.cfg["data"]["train"]["transform"]["lgt"],
-            use_random_grayscale=self.cfg["data"]["train"]["transform"][
-                "random_grayscale"
-            ],
+            use_random_grayscale=self.cfg["data"]["train"]["transform"]["random_grayscale"],
         )
         cache = None
         if self.args.on_memory_dataset:
@@ -328,9 +318,7 @@ class SimpleTrainer(BaseTrainer):
 
     def before_val_epoch(self):
         self.model_test = (
-            self.model_ema.module
-            if ((self.model_ema != None) and self.cfg["testing"]["test_on_ema"])
-            else self.model
+            self.model_ema.module if ((self.model_ema != None) and self.cfg["testing"]["test_on_ema"]) else self.model
         )
 
     def run_val_epoch(self):
@@ -353,21 +341,15 @@ class SimpleTrainer(BaseTrainer):
         )
 
         if self.cfg["testing"]["distance_mode"] == "euclidean":
-            distance = euclidean_dist(
-                query_feature, gallery_feature, sqrt=False, clip=False
-            )
+            distance = euclidean_dist(query_feature, gallery_feature, sqrt=False, clip=False)
         elif self.cfg["testing"]["distance_mode"] == "cosine":
             distance = cosine_dist(query_feature, gallery_feature, alpha=1)
         elif self.cfg["testing"]["distance_mode"] == "hamming":
             distance = hamming_distance(query_feature, gallery_feature)
         else:
-            raise ValueError(
-                "cfg[testing][distance_mode] must be one of euclidean, cosine, hamming"
-            )
+            raise ValueError("cfg[testing][distance_mode] must be one of euclidean, cosine, hamming")
 
-        cmc, all_AP, all_INP = evaluate_rank(
-            distance, query_label, gallery_label, query_camera, gallery_camera
-        )
+        cmc, all_AP, all_INP = evaluate_rank(distance, query_label, gallery_label, query_camera, gallery_camera)
 
         return {
             "mAP": np.mean(all_AP),
@@ -383,9 +365,7 @@ class SimpleTrainer(BaseTrainer):
     def before_test_step(self):
         super().before_test_step()
         self.model_test = (
-            self.model_ema.module
-            if ((self.model_ema != None) and self.cfg["testing"]["test_on_ema"])
-            else self.model
+            self.model_ema.module if ((self.model_ema != None) and self.cfg["testing"]["test_on_ema"]) else self.model
         )
 
     def run_test(self):
