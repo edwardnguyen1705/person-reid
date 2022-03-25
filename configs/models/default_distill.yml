@@ -93,6 +93,14 @@ model:
       activation:
         name: ReLU
         inplace: True
+
+      attention: # build_attention for more information
+        enable: False
+        name: NonLocalBlock
+        rd_ratio: -1 # -1 it mean hidden_channel = 1 in nonlocal block
+        cam_batchnorm: False
+        pam_batchnorm: False
+
       pretrained: True
       progress: True
 
@@ -239,6 +247,14 @@ model_t:
       activation:
         name: ReLU
         inplace: True
+
+      attention: # build_attention for more information
+        enable: False
+        name: NonLocalBlock
+        rd_ratio: -1 # -1 it mean hidden_channel = 1 in nonlocal block
+        cam_batchnorm: False
+        pam_batchnorm: False
+
       pretrained: True
       progress: True
 

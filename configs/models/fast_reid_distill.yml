@@ -4,27 +4,14 @@ model:
   name: Baseline
 
   backbone:
-    name: resnet
+    name: resnest
 
-    resnet:
-      resnext: False
-      with_se: False
-      num_layer: 34
-      with_d: False
-      resnext_type: null
-      with_ibn_a: False
+    resnest:
+      num_layer: 50
       last_stride: 1
       activation:
         name: ReLU
-        inplace: true
-
-      attention:
-        enable: True
-        name: NonLocalBlock
-        rd_ratio: 0.0625
-        cam_batchnorm: True
-        pam_batchnorm: True
-
+        inplace: True
       pretrained: True
       progress: True
 
